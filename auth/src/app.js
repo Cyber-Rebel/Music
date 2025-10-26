@@ -1,10 +1,12 @@
 const express = require('express');
 const app = express();
+const cookieParser = require('cookie-parser')
 const authRouter = require('./routes/auth.routes.js');
 const passport = require('passport');
 const {Strategy:GoogleStrategy}  = require('passport-google-oauth20');
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({extended:true}));
 app.use(passport.initialize());
 passport.use(new GoogleStrategy({
