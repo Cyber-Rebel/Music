@@ -1,4 +1,4 @@
-import { Routes, Route, Link, NavLink } from 'react-router-dom'
+import { Routes, Route, Link, NavLink, Navigate } from 'react-router-dom'
 import './App.css'
 import { useState, useEffect } from 'react'
 import Home from './pages/Home'
@@ -7,6 +7,8 @@ import Login from './pages/Login'
 import ArtistDashboard from './pages/artist/ArtistDashboard'
 import UploadMusic from './pages/artist/UploadMusic'
 import MusicPlayer from './pages/music/MusicPlayer'
+import CreatePlaylist from './pages/CreatePlaylist'
+import PlaylistView from './pages/PlaylistView'
 import { io } from 'socket.io-client'
 
 function App() {
@@ -27,8 +29,6 @@ function App() {
     })
 
   }, [])
-
-
   return (
     <div className="app">
       {/* Sidebar Navigation */}
@@ -112,42 +112,18 @@ function App() {
           <Route path="/" element={<Home socket={socket} />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/playlist/create" element={<CreatePlaylist />} />
+          <Route path="/playlist/:id" element={<PlaylistView socket={socket} />} />
           <Route path="/artist/dashboard" element={<ArtistDashboard />} />
           <Route path="/artist/dashboard/upload-music" element={<UploadMusic />} />
+          <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="*" element={<Navigate to="/login"  />} />
           <Route path="/music/:id" element={<MusicPlayer />} />
         </Routes>
       </main>
 
-      {/* Bottom Play Bar */}
-      <div className="app-playbar">
-        <div className="playbar-left">
-          <div className="current-track-info">
-            <div className="track-image">
-              {/* Track image placeholder */}
-            </div>
-            <div className="track-details">
-              <div className="track-name">Track Name</div>
-              <div className="track-artist">Artist Name</div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="playbar-center">
-          <div className="player-controls">
-            {/* Player controls will go here */}
-            <button className="btn-small btn-secondary">⏮</button>
-            <button className="btn-small">⏯</button>
-            <button className="btn-small btn-secondary">⏭</button>
-          </div>
-        </div>
-        
-        <div className="playbar-right">
-          <div className="volume-controls">
-            {/* Volume controls will go here */}
-            <button className="btn-small btn-secondary">🔊</button>
-          </div>
-        </div>
-      </div>
+      
     </div>
 
   )

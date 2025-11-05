@@ -6,24 +6,9 @@ import axios from 'axios'
 export default function Home({ socket }) {
   const navigate = useNavigate();
 
-  // Sample data; later can be replaced by API calls
-  const [ musics, setMusics ] = useState(
-    [
-      { id: 'm1', title: 'Midnight Echoes', artist: 'Alex Wave', coverImageUrl: 'https://via.placeholder.com/300?text=M1' },
-      { id: 'm2', title: 'Golden Skies', artist: 'Luna Sun', coverImageUrl: 'https://via.placeholder.com/300?text=M2' },
-      { id: 'm3', title: 'Fading Lights', artist: 'Neon Drift', coverImageUrl: 'https://via.placeholder.com/300?text=M3' },
-      { id: 'm4', title: 'Ocean Drift', artist: 'Deep Current', coverImageUrl: 'https://via.placeholder.com/300?text=M4' },
-      { id: 'm5', title: 'Solstice', artist: 'Alex Wave', coverImageUrl: 'https://via.placeholder.com/300?text=M5' },
-      { id: 'm6', title: 'Night Sparks', artist: 'Luna Sun', coverImageUrl: 'https://via.placeholder.com/300?text=M6' },
-    ]
-  )
-
-  const [ playlists, setPlaylists ] = useState([
-    { id: 'p1', title: 'Chill Vibes', count: 32 },
-    { id: 'p2', title: 'Focus Beats', count: 24 },
-    { id: 'p3', title: 'Acoustic', count: 18 },
-    { id: 'p4', title: 'Late Night', count: 15 },
-  ])
+  // Start empty — load from API. Remove dummy data.
+  const [ musics, setMusics ] = useState([])
+  const [ playlists, setPlaylists ] = useState([])
 
   useEffect(() => {
     axios.get("http://localhost:3002/api/music", { withCredentials: true })
@@ -59,11 +44,24 @@ export default function Home({ socket }) {
       <section className="home-section">
         <div className="section-head">
           <h2 className="section-title">Playlists</h2>
-          <button className="btn btn-small" type="button">View All</button>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <button
+              className="btn btn-small"
+              type="button"
+              onClick={() => navigate('/playlist/create')}
+              aria-label="Create playlist"
+            >
+              + Create
+            </button>
+            <button className="btn btn-small" type="button">View All</button>
+          </div>
         </div>
         <div className="playlist-grid">
+          {playlists.length === 0 && (
+            <p className="text-muted">No playlists yet.</p>
+          )}
           {playlists.map(p => (
-            <div key={p.id} className="playlist-card surface" tabIndex={0}>
+            <div key={p.id} className="playlist-card surface" tabIndex={0} onClick={() => navigate(`/playlist/${p.id}`)}>
               <div className="playlist-info">
                 <h3 className="playlist-title" title={p.title}>{p.title}</h3>
                 <p className="playlist-meta text-muted">{p.count} tracks</p>
@@ -79,6 +77,9 @@ export default function Home({ socket }) {
           <button className="btn btn-small" type="button">Explore</button>
         </div>
         <div className="music-grid">
+          {musics.length === 0 && (
+            <p className="text-muted">No tracks available.</p>
+          )}
           {musics.map(m => (
             <div
               onClick={() => {
