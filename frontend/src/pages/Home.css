@@ -692,3 +692,217 @@
     height: 18px;
   }
 }
+
+/* ============= FLOATING PLUS BUTTON ============= */
+.floating-plus-button {
+  position: fixed;
+  bottom: 140px;
+  right: 100px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  border: none;
+  color: #000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(29, 185, 84, 0.4), 0 4px 12px rgba(0, 0, 0, 0.6);
+  transition: all 0.3s ease;
+  z-index: 999;
+}
+
+.floating-plus-button:hover {
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 12px 32px rgba(29, 185, 84, 0.5), 0 6px 16px rgba(0, 0, 0, 0.7);
+}
+
+.floating-plus-button:active {
+  transform: scale(0.95) rotate(90deg);
+}
+
+.floating-plus-button svg {
+  width: 32px;
+  height: 32px;
+}
+
+/* ============= MOOD DETECTOR MODAL ============= */
+.mood-detector-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 1;
+}
+
+.modal-content {
+  position: relative;
+  z-index: 2;
+  background: var(--bg-elevated);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.close-modal-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.close-modal-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.close-modal-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+.modal-body {
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
+}
+
+.mood-detector-iframe {
+  width: 100%;
+  height: 600px;
+  border: none;
+  border-radius: 0 0 16px 16px;
+}
+
+/* Blur effect for main content when modal is open */
+.main-content.blurred {
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+/* Responsive adjustments for modal */
+@media (max-width: 768px) {
+  .floating-plus-button {
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+  }
+
+  .floating-plus-button svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .mood-detector-modal {
+    padding: 12px;
+  }
+
+  .modal-content {
+    max-height: 95vh;
+  }
+
+  .modal-header {
+    padding: 20px 24px;
+  }
+
+  .modal-header h2 {
+    font-size: 20px;
+  }
+
+  .mood-detector-iframe {
+    height: 500px;
+  }
+}
+
+@media (max-width: 480px) {
+  .floating-plus-button {
+    bottom: 20px;
+    right: 20px;
+    width: 52px;
+    height: 52px;
+  }
+
+  .floating-plus-button svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .modal-header {
+    padding: 16px 20px;
+  }
+
+  .modal-header h2 {
+    font-size: 18px;
+  }
+
+  .close-modal-button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .close-modal-button svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .mood-detector-iframe {
+    height: 400px;
+  }
+}

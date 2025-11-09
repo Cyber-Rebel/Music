@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import './Register.css';
+import { useDispatch } from 'react-redux';
+import {registerUser} from '../store/actions/authAction.jsx'
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +11,7 @@ const Register = () => {
     password: '',
     role: 'user'
   });
+  const dispatch = useDispatch()
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,6 +35,8 @@ const Register = () => {
     };
 
     console.log('Register with:', registerData);
+      dispatch(registerUser(registerData))
+
     // Handle registration logic here
   };
 

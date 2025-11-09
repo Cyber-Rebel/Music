@@ -1,19 +1,35 @@
 import React, { useState } from 'react';
 import './Login.css';
+import {loginUser} from '../store/actions/authAction.jsx'
+import { useDispatch } from 'react-redux';
+
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const dispatch = useDispatch()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login with:', { email, password });
+    try{
+    const response = await dispatch(loginUser({
+      email,
+      password
+    }))
+
+    console.log(response)
+  }catch(error){
+    console.log("Error in login",error)
+  }
   };
 
   const handleGoogleLogin = () => {
     // Handle Google login logic here
     console.log('Login with Google');
+  //  const data= dispatch(loginUser({}))
+    window.location.href = 'http://localhost:3000/api/auth/google';
+   // console.log(data)
+
   };
 
   return (
@@ -25,7 +41,7 @@ const Login = () => {
         
         <h2 className="login-title">Log in to Music</h2>
         
-        <button className="google-btn" onClick={handleGoogleLogin}>
+        <button  className="google-btn" onClick={handleGoogleLogin}>
           <svg className="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>

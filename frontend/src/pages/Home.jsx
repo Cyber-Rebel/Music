@@ -9,6 +9,7 @@ import './Home.css';
 const Home = () => {
   const [currentSong, setCurrentSong] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMoodDetectorOpen, setIsMoodDetectorOpen] = useState(false);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -16,6 +17,14 @@ const Home = () => {
 
   const closeSidebar = () => {
     setIsSidebarOpen(false);
+  };
+
+  const toggleMoodDetector = () => {
+    setIsMoodDetectorOpen(!isMoodDetectorOpen);
+  };
+
+  const closeMoodDetector = () => {
+    setIsMoodDetectorOpen(false);
   };
 
   const handlePlay = (songInfo) => {
@@ -67,7 +76,7 @@ const Home = () => {
       <Sidebar isOpen={isSidebarOpen} currentSong={currentSong} />
 
       {/* Main Content */}
-      <main className="main-content">
+      <main className={`main-content ${isMoodDetectorOpen ? 'blurred' : ''}`}>
         {/* Header with Profile */}
         <Header onMenuClick={toggleSidebar} />
 
@@ -109,6 +118,41 @@ const Home = () => {
           </ContentSection>
         </div>
       </main>
+
+      {/* Floating Plus Button */}
+      <button 
+        className="floating-plus-button" 
+        onClick={toggleMoodDetector}
+        title="Mood Detector"
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+        </svg>
+      </button>
+
+      {/* Mood Detector Modal */}
+      {isMoodDetectorOpen && (
+        <div className="mood-detector-modal">
+          <div className="modal-overlay" onClick={closeMoodDetector}></div>
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>Mood Detector</h2>
+              <button className="close-modal-button" onClick={closeMoodDetector}>
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <iframe 
+                src="http://localhost:5174" 
+                title="Mood Detector"
+                className="mood-detector-iframe"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
