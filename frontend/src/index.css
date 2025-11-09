@@ -1,97 +1,216 @@
-/* Spotify-inspired Base Styles */
-* { 
-  box-sizing: border-box; 
-}
+/* /home/cyber-rebel/Desktop/Music/frontend/src/index.css */
 
-html {
-  height: 100%;
-  overflow-x: hidden;
-}
-
-body {
+/* Reset */
+*{
   margin: 0;
   padding: 0;
-  min-width: 320px;
-  min-height: 100vh;
+  box-sizing: border-box;
+}
+html, body {
   height: 100%;
-  font-family: var(--font-sans);
-  background: var(--color-bg);
-  color: var(--color-text);
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  overflow-x: hidden;
 }
 
-#root { 
-  width: 100%; 
+/* Theme vars */
+:root{
+  --bg: #121212;
+  --surface: #181818;
+  --muted: rgba(255,255,255,0.6);
+  --text: #ffffff;
+  --accent: #1DB954; /* green accent similar to many music apps */
+}
+
+/* App layout */
+.app {
   min-height: 100vh;
-  background: var(--color-bg);
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: 1fr auto;
+  background: linear-gradient(180deg, var(--bg), #0f0f0f);
+  color: var(--text);
 }
 
-/* Global link styles */
-a { 
-  text-decoration: none; 
-  color: inherit;
-  transition: color var(--transition-fast);
+/* Left sidebar */
+.sidebar {
+  background: linear-gradient(180deg, #0b0b0b, #0f0f0f);
+  padding: 24px;
+  height: 100vh;
+  overflow: auto;
+  border-right: 1px solid rgba(255,255,255,0.03);
+}
+.logo {
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--accent);
+  margin-bottom: 18px;
+  letter-spacing: 0.6px;
+}
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.nav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 6px;
+  color: var(--muted);
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 14px;
+}
+.nav a:hover,
+.nav a.active {
+  background: rgba(29,185,84,0.12);
+  color: var(--text);
 }
 
-a:focus-visible { 
-  outline: 2px solid var(--color-focus-ring); 
-  outline-offset: 2px; 
+/* Main content */
+.content {
+  padding: 28px;
+  min-height: calc(100vh - 88px);
+  overflow: auto;
 }
 
-/* Typography scale consistency */
-h1 { 
-  font-size: var(--font-size-3xl); 
-  font-weight: var(--font-weight-black);
+/* Top bar */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+.search {
+  background: rgba(255,255,255,0.04);
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: var(--muted);
+  width: 320px;
+  border: 1px solid rgba(255,255,255,0.02);
 }
 
-/* Remove any global centering that interferes with Spotify layout */
-body { 
-  display: block;
-  place-items: unset;
-  justify-content: unset;
-  padding: 0;
+/* Grid of albums/playlists */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 18px;
 }
 
-/* Ensure consistent button styling */
-button {
-  font-family: inherit;
+/* Card style */
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+  padding: 12px;
+  border-radius: 8px;
   cursor: pointer;
-  border: none;
-  background: none;
-  transition: all var(--transition-fast);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+}
+.card .cover {
+  width: 100%;
+  padding-top: 100%;
+  background: linear-gradient(135deg, #3b3b3b, #252525);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.card .title {
+  font-weight: 700;
+  font-size: 14px;
+}
+.card .subtitle {
+  font-size: 12px;
+  color: var(--muted);
 }
 
-button:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 2px;
+/* Footer player */
+.player {
+  grid-column: 1 / -1;
+  height: 88px;
+  background: linear-gradient(180deg, var(--surface), #0f0f0f);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  position: sticky;
+  bottom: 0;
+  gap: 18px;
+}
+.player .left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.player .meta {
+  display: flex;
+  flex-direction: column;
+}
+.player .meta .song {
+  font-weight: 600;
+  font-size: 14px;
+}
+.player .meta .artist {
+  font-size: 12px;
+  color: var(--muted);
+}
+.controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.progress {
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 6px;
+  flex: 1;
+  margin: 0 12px;
+  overflow: hidden;
+  position: relative;
+}
+.progress .bar {
+  height: 100%;
+  width: 30%;
+  background: var(--accent);
 }
 
-/* Form elements consistency */
-input, textarea, select {
-  font-family: inherit;
-  font-size: inherit;
+/* Scrollbar (light touch) */
+.sidebar::-webkit-scrollbar,
+.content::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.sidebar::-webkit-scrollbar-thumb,
+.content::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.04);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
-input:focus, textarea:focus, select:focus {
-  outline: none;
-}
-
-/* Accessibility improvements */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+/* Responsive */
+@media (max-width: 900px) {
+  .app {
+    grid-template-columns: 80px 1fr;
   }
+  .sidebar { padding: 12px; }
+  .logo { display: none; }
+  .search { width: 180px; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 }
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  :root {
-    --color-border: #ffffff;
-    --color-text-muted: #cccccc;
+@media (max-width: 520px) {
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto auto;
   }
+  .sidebar { position: relative; height: auto; border-right: none; }
+  .player { position: fixed; width: 100%; left: 0; bottom: 0; z-index: 50; }
+  .content { padding-bottom: 110px; }
 }

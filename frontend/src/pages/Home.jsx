@@ -1,104 +1,116 @@
-import React, { useEffect, useState } from 'react'
-import './Home.css'
-import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import React, { useState } from 'react';
+import Sidebar from '../components/Sidebar';
+import Header from '../components/Header';
+import WelcomeSection from '../components/WelcomeSection';
+import ContentSection from '../components/ContentSection';
+import MusicCard from '../components/MusicCard';
+import './Home.css';
 
-export default function Home({ socket }) {
-  const navigate = useNavigate();
+const Home = () => {
+  const [currentSong, setCurrentSong] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Start empty — load from API. Remove dummy data.
-  const [ musics, setMusics ] = useState([])
-  const [ playlists, setPlaylists ] = useState([])
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
-  useEffect(() => {
-    axios.get("http://localhost:3002/api/music", { withCredentials: true })
-      .then(res => {
-        console.log(res.data.musics)
-        setMusics(res.data.musics.map(m => ({
-          id: m._id,
-          title: m.title,
-          artist: m.artist,
-          coverImageUrl: m.coverUrl,
-          musicUrl: m.musicUrl,
-        })))
-      })
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
 
-    axios.get("http://localhost:3002/api/music/playlist", { withCredentials: true })
-      .then(res => {
-        setPlaylists(res.data.playlists.map(p => ({
-          id: p._id,
-          title: p.title,
-          count: p.musics.length
-        })))
-      })
+  const handlePlay = (songInfo) => {
+    console.log('Playing:', songInfo);
+    // Add your play logic here
+  };
 
-  }, [])
+  // Sample data
+  const quickPicks = [
+    { title: 'Playlist 1', image: null },
+    { title: 'Playlist 2', image: null },
+    { title: 'Playlist 3', image: null },
+    { title: 'Playlist 4', image: null },
+    { title: 'Playlist 5', image: null },
+    { title: 'Playlist 6', image: null },
+  ];
+
+  const madeForYou = [
+    { title: 'Daily Mix 1', description: 'Your favorite tracks and more', image: null },
+    { title: 'Daily Mix 2', description: 'Your favorite tracks and more', image: null },
+    { title: 'Daily Mix 3', description: 'Your favorite tracks and more', image: null },
+    { title: 'Daily Mix 4', description: 'Your favorite tracks and more', image: null },
+    { title: 'Daily Mix 5', description: 'Your favorite tracks and more', image: null },
+  ];
+
+  const recentlyPlayed = [
+    { title: 'Song 1', description: 'Artist Name', image: null },
+    { title: 'Song 2', description: 'Artist Name', image: null },
+    { title: 'Song 3', description: 'Artist Name', image: null },
+    { title: 'Song 4', description: 'Artist Name', image: null },
+    { title: 'Song 5', description: 'Artist Name', image: null },
+  ];
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  };
 
   return (
-    <div className="home-page stack" style={{ gap: 'var(--space-8)' }}>
-      <header className="home-hero">
-        <h1 className="home-title">Discover</h1>
-        <p className="text-muted home-tag">Trending playlists and new releases</p>
-      </header>
+    <div className="home-container">
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div className="sidebar-overlay" onClick={closeSidebar}></div>
+      )}
 
-      <section className="home-section">
-        <div className="section-head">
-          <h2 className="section-title">Playlists</h2>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <button
-              className="btn btn-small"
-              type="button"
-              onClick={() => navigate('/playlist/create')}
-              aria-label="Create playlist"
-            >
-              + Create
-            </button>
-            <button className="btn btn-small" type="button">View All</button>
-          </div>
-        </div>
-        <div className="playlist-grid">
-          {playlists.length === 0 && (
-            <p className="text-muted">No playlists yet.</p>
-          )}
-          {playlists.map(p => (
-            <div key={p.id} className="playlist-card surface" tabIndex={0} onClick={() => navigate(`/playlist/${p.id}`)}>
-              <div className="playlist-info">
-                <h3 className="playlist-title" title={p.title}>{p.title}</h3>
-                <p className="playlist-meta text-muted">{p.count} tracks</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Sidebar */}
+      <Sidebar isOpen={isSidebarOpen} currentSong={currentSong} />
 
-      <section className="home-section">
-        <div className="section-head">
-          <h2 className="section-title">Musics</h2>
-          <button className="btn btn-small" type="button">Explore</button>
+      {/* Main Content */}
+      <main className="main-content">
+        {/* Header with Profile */}
+        <Header onMenuClick={toggleSidebar} />
+
+        {/* Content Area */}
+        <div className="content-area">
+          <WelcomeSection 
+            greeting={getGreeting()} 
+            quickPicks={quickPicks}
+          />
+
+          <ContentSection 
+            title="Made for you"
+            onSeeAll={() => console.log('See all Made for you')}
+          >
+            {madeForYou.map((item, index) => (
+              <MusicCard
+                key={index}
+                title={item.title}
+                description={item.description}
+                image={item.image}
+                onPlay={() => handlePlay(item)}
+              />
+            ))}
+          </ContentSection>
+
+          <ContentSection 
+            title="Recently played"
+            onSeeAll={() => console.log('See all Recently played')}
+          >
+            {recentlyPlayed.map((item, index) => (
+              <MusicCard
+                key={index}
+                title={item.title}
+                description={item.description}
+                image={item.image}
+                onPlay={() => handlePlay(item)}
+              />
+            ))}
+          </ContentSection>
         </div>
-        <div className="music-grid">
-          {musics.length === 0 && (
-            <p className="text-muted">No tracks available.</p>
-          )}
-          {musics.map(m => (
-            <div
-              onClick={() => {
-                socket?.emit("play", { musicId: m.id })
-                navigate(`/music/${m.id}`)
-              }}
-              key={m.id} className="music-card surface" tabIndex={0}>
-              <div className="music-cover-wrap">
-                <img src={m.coverImageUrl} alt="" className="music-cover" />
-              </div>
-              <div className="music-info">
-                <h3 className="music-title" title={m.title}>{m.title}</h3>
-                <p className="music-artist text-muted" title={m.artist}>{m.artist}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      </main>
     </div>
-  )
-}
+  );
+};
 
+export default Home;
