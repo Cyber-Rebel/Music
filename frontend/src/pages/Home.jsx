@@ -110,28 +110,12 @@ useEffect(() => {
           <WelcomeSection 
             greeting={getGreeting()} 
             quickPicks={musicPlaylist}
+            Myplaylist={myPlaylist}
           />
 
-          <ContentSection 
-            title="My Playlists"
-            onSeeAll={() => console.log('See all playlists')}
-          >
-            <MyPlaylistSection 
-              playlists={Array.isArray(myPlaylist) ? myPlaylist : []}
-              onPlaylistClick={handlePlaylistClick}
-            />
-          </ContentSection>
-
-          <ContentSection 
-            title="Artist Playlists"
-            onSeeAll={() => console.log('See all artists')}
-          >
-            <ArtistPlaylistSection 
-              artists={Array.isArray(playlist) ? playlist : []}
-              onArtistClick={handleArtistClick}
-            />
-          </ContentSection>
-         
+          
+          
+                                                                                                          
           <ContentSection 
             title="Made for you"
             onSeeAll={() => console.log('See all Made for you')}

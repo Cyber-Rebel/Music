@@ -9,6 +9,9 @@ const SongPlayer = () => {
   const { musicdata } = useSelector(state => state.music);
   const [song, setSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
   const audioRef = useRef(null);
 
   useEffect(() => {
@@ -44,6 +47,65 @@ const SongPlayer = () => {
     navigate(-1);
   };
 
+  const handleNext = () => {
+    if (musicdata && musicdata.length > 0) {
+      const currentIndex = musicdata.findIndex(s => s._id === id);
+      if (currentIndex !== -1 && currentIndex < musicdata.length - 1) {
+        const nextSong = musicdata[currentIndex + 1];
+        navigate(`/song/${nextSong._id}`);
+      } else {
+        // If at the end, loop to the first song
+        navigate(`/song/${musicdata[0]._id}`);
+      }
+    }
+  };
+
+  const handlePrevious = () => {
+    if (musicdata && musicdata.length > 0) {
+      const currentIndex = musicdata.findIndex(s => s._id === id);
+      if (currentIndex > 0) {
+        const previousSong = musicdata[currentIndex - 1];
+        navigate(`/song/${previousSong._id}`);
+      } else {
+        // If at the beginning, loop to the last song
+        navigate(`/song/${musicdata[musicdata.length - 1]._id}`);
+      }
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
+  };
+
+  const handleProgressClick = (e) => {
+    if (audioRef.current) {
+      const progressBar = e.currentTarget;
+      const clickPosition = (e.clientX - progressBar.getBoundingClientRect().left) / progressBar.offsetWidth;
+      audioRef.current.currentTime = clickPosition * duration;
+    }
+  };
+
+  const handleLikeToggle = () => {
+    setIsLiked(!isLiked);
+    // Add your like/unlike API call here
+    console.log('Song liked:', !isLiked);
+  };
+
+  const formatTime = (time) => {
+    if (isNaN(time)) return '0:00';
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
   if (!song) {
     return (
       <div className="song-player-container">
@@ -57,9 +119,11 @@ const SongPlayer = () => {
       {/* Audio Element */}
       <audio 
         ref={audioRef}
-        onEnded={() => setIsPlaying(false)}
+        onEnded={handleNext}
         onPause={() => setIsPlaying(false)}
         onPlay={() => setIsPlaying(true)}
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
       />
 
       {/* Back Button */}
@@ -90,10 +154,23 @@ const SongPlayer = () => {
           <h1 className="song-title-player">{song.title}</h1>
           <p className="artist-name-player">{song.artist}</p>
         </div>
+        {/* Progress Bar */}
+        <div className="progress-container">
+          <span className="time-current">{formatTime(currentTime)}</span>
+          <div className="progress-bar" onClick={handleProgressClick}>
+            <div 
+              className="progress-fill" 
+              style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+            >
+              <div className="progress-handle"></div>
+            </div>
+          </div>
+          <span className="time-total">{formatTime(duration)}</span>
+        </div>
 
         {/* Playback Controls */}
         <div className="playback-controls">
-          <button className="control-button" title="Previous">
+          <button className="control-button" onClick={handlePrevious} title="Previous">
             <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
             </svg>
@@ -115,24 +192,38 @@ const SongPlayer = () => {
             )}
           </button>
 
-          <button className="control-button" title="Next">
+          <button className="control-button" onClick={handleNext} title="Next">
             <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
             </svg>
           </button>
         </div>
 
-        {/* Additional Info */}
-        <div className="additional-info">
-          <div className="info-item">
-            <span className="info-label">Album:</span>
-            <span className="info-value">{song.album || 'Unknown Album'}</span>
-          </div>
-          <div className="info-item">
-            <span className="info-label">Duration:</span>
-            <span className="info-value">{song.duration || '0:00'}</span>
-          </div>
+        
+
+        {/* Action Buttons */}
+        <div className="action-buttons">
+          <button 
+            className={`action-button ${isLiked ? 'liked' : ''}`}
+            onClick={handleLikeToggle}
+            title={isLiked ? 'Unlike' : 'Like'}
+          >
+            {isLiked ? (
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+            )}
+          </button>
+          
+          
         </div>
+
+       
+        
       </div>
     </div>
   );

@@ -20,6 +20,7 @@
 
 .home-container {
   display: flex;
+  width: 100vw;
   height: 100vh;
   background: var(--bg-dark);
   color: var(--text-primary);
@@ -196,7 +197,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, #1a1a1a 0%, var(--bg-elevated) 300px);
+  background: linear-gradient(180deg, #000000 0%, var(--bg-elevated) 300px);
   overflow: hidden;
 }
 
@@ -433,6 +434,7 @@
 
 .music-card {
   background: var(--bg-base);
+  
   padding: 16px;
   border-radius: 8px;
   cursor: pointer;
@@ -469,6 +471,7 @@
   background: var(--accent);
   border: none;
   color: #000;
+  
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -501,6 +504,7 @@
 }
 
 .card-description {
+  
   font-size: 14px;
   color: var(--text-secondary);
   line-height: 1.4;
@@ -695,6 +699,7 @@
 
 /* ============= FLOATING PLUS BUTTON ============= */
 .floating-plus-button {
+  
   position: fixed;
   bottom: 120px;
   right: 32px;
@@ -754,6 +759,7 @@
 }
 
 .player-song-thumbnail {
+  
   width: 56px;
   height: 56px;
   border-radius: 6px;
@@ -862,6 +868,7 @@
 /* ============= MOOD DETECTOR MODAL ============= */
 .mood-detector-modal {
   position: fixed;
+
   top: 0;
   left: 0;
   right: 0;
@@ -929,6 +936,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
+  
   background: rgba(255, 255, 255, 0.1);
   border: none;
   color: var(--text-primary);
@@ -1092,6 +1100,7 @@
 .artist-playlist-section,
 .song-list-section {
   display: flex;
+  width: 80vw;
   gap: 24px;
   overflow-x: auto;
   overflow-y: hidden;
@@ -1104,7 +1113,7 @@
 .my-playlist-section::-webkit-scrollbar,
 .artist-playlist-section::-webkit-scrollbar,
 .song-list-section::-webkit-scrollbar {
-  height: 8px;
+  height: 2px;
 }
 
 .my-playlist-section::-webkit-scrollbar-track,
@@ -1125,6 +1134,7 @@
 .artist-playlist-section::-webkit-scrollbar-thumb:hover,
 .song-list-section::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
+
 }
 
 /* Card items in horizontal layout */

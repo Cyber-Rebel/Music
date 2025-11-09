@@ -7,6 +7,7 @@ import CreatePlaylist from '../pages/CreatePlaylist';
 import UploadSongs from '../pages/UploadSongs';
 import MoodDetector from '../pages/MoodDetector';
 import SongPlayer from '../pages/SongPlayer';
+import PlaylistPage from '../pages/PlaylistPage';
 import { useSelector } from 'react-redux';
 
 const ProtectedRoute = ({ children, id }) => {
@@ -76,6 +77,14 @@ const AppRouter = () => {
                 element={
                     <ProtectedRoute id={id}>
                         <SongPlayer />
+                    </ProtectedRoute>
+                } 
+            />
+            <Route 
+                path='/playlist/:playlistId' 
+                element={
+                    <ProtectedRoute id={id}>
+                        <PlaylistPage />
                     </ProtectedRoute>
                 } 
             />
