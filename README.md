@@ -31,37 +31,6 @@ A modern, full-stack music streaming application built with React, Node.js, Expr
 - Google OAuth credentials
 - Gmail account for email notifications
 
-### Environment Variables
-
-Create `.env` files in each service directory:
-
-#### Auth Service (.env)
-```env
-MONGODB_URI=mongodb://localhost:27017/musicstream-auth
-JWT_SECRET=your_jwt_secret_here
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-RABBITMQ_URL=amqp://localhost
-```
-
-#### Music Service (.env)
-```env
-MONGODB_URI=mongodb://localhost:27017/musicstream-music
-JWT_SECRET=your_jwt_secret_here
-Imagekit_PUBLIC_KEY=your_imagekit_public_key
-Imagekit_PRIVATE_KEY=your_imagekit_private_key
-Imagekit_URL_ENDPOINT=your_imagekit_url_endpoint
-```
-
-#### Notification Service (.env)
-```env
-RABBITMQ_URL=amqp://localhost
-EMAIL_USER=your_gmail_email
-CLIENT_ID=your_google_oauth_client_id
-CLIENT_SECRET=your_google_oauth_client_secret
-REFRESH_TOKEN_SECRET=your_google_oauth_refresh_token
-```
-
 ### Installation & Setup
 
 1. **Clone the repository and install dependencies:**
