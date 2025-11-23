@@ -1,10 +1,15 @@
 import { FaPlay, FaPause, FaStepForward, FaStepBackward, FaRandom, FaRedo, FaVolumeUp, FaHeart } from 'react-icons/fa';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 const MusicPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(70);
   const [progress, setProgress] = useState(45);
+
+  const sliderVars = useMemo(() => ({
+    progress: { '--range-progress': `${progress}%` },
+    volume: { '--range-progress': `${volume}%` }
+  }), [progress, volume]);
 
   // Dummy current song
   const currentSong = {
@@ -67,14 +72,16 @@ const MusicPlayer = () => {
           {/* Progress Bar */}
           <div className="flex items-center gap-2 w-full">
             <span className="text-xs text-[#b3b3b3] w-8 lg:w-10 text-right">1:45</span>
-            <div className="flex-1 bg-[#4d4d4d] h-1 rounded-full overflow-hidden group cursor-pointer">
-              <div
-                className="bg-[#b3b3b3] group-hover:bg-[#1db954] h-full transition-colors relative"
-                style={{ width: `${progress}%` }}
-              >
-                <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-2 h-2 lg:w-3 lg:h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              </div>
-            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={progress}
+              onChange={(event) => setProgress(Number(event.target.value))}
+              aria-label="Playback progress"
+              className="range-slider flex-1"
+              style={sliderVars.progress}
+            />
             <span className="text-xs text-[#b3b3b3] w-8 lg:w-10">3:45</span>
           </div>
         </div>
@@ -82,14 +89,16 @@ const MusicPlayer = () => {
         {/* Right - Volume Control */}
         <div className="hidden lg:flex items-center gap-3 w-1/4 justify-end">
           <FaVolumeUp className="text-[#b3b3b3]" />
-          <div className="w-24 bg-[#4d4d4d] h-1 rounded-full overflow-hidden group cursor-pointer">
-            <div
-              className="bg-[#b3b3b3] group-hover:bg-[#1db954] h-full transition-colors relative"
-              style={{ width: `${volume}%` }}
-            >
-              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </div>
-          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={volume}
+            onChange={(event) => setVolume(Number(event.target.value))}
+            aria-label="Volume"
+            className="range-slider w-24"
+            style={sliderVars.volume}
+          />
         </div>
       </div>
     </div>

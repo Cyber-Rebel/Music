@@ -7,11 +7,18 @@ import ArtistPlaylists from './pages/ArtistPlaylists';
 import SinglePlaylist from './pages/SinglePlaylist';
 import CreatePlaylist from './pages/CreatePlaylist';
 import MyPlaylists from './pages/MyPlaylists';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 
 const App = () => {
   return (
     <Router>
       <Routes>
+        {/* Auth Routes - Without MainLayout */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        
+        {/* App Routes - With MainLayout */}
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Home />} />
           <Route path="song/:id" element={<SongDetails />} />

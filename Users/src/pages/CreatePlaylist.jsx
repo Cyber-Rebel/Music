@@ -25,16 +25,16 @@ const CreatePlaylist = () => {
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="px-4 py-6 md:p-6 max-w-2xl mx-auto">
       <h1 className="text-4xl font-bold text-white mb-8">Create New Playlist</h1>
 
-      <form onSubmit={handleSubmit} className="bg-[#181818] rounded-lg p-8 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-[#181818] rounded-lg p-6 md:p-8 space-y-6">
         {/* Cover Upload */}
         <div>
           <label className="block text-white font-semibold mb-3">
             Playlist Cover
           </label>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col sm:flex-row items-start gap-6">
             <div className="w-40 h-40 bg-[#282828] rounded-lg flex items-center justify-center overflow-hidden">
               {formData.cover ? (
                 <img
@@ -97,7 +97,7 @@ const CreatePlaylist = () => {
         </div>
 
         {/* Buttons */}
-        <div className="flex gap-4 pt-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
           <button
             type="submit"
             className="bg-[#1db954] text-black px-8 py-3 rounded-full font-semibold hover:scale-105 transition-transform"
@@ -107,7 +107,7 @@ const CreatePlaylist = () => {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="bg-[#282828] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#3e3e3e] transition-colors"
+            className="bg-[#282828] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#3e3e3e] transition-colors text-center"
           >
             Cancel
           </button>

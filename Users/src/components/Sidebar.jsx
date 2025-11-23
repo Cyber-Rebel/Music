@@ -1,8 +1,10 @@
-import { NavLink } from 'react-router-dom';
-import { FaHome, FaMusic, FaList, FaPlus } from 'react-icons/fa';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { FaHome, FaMusic, FaList, FaPlus, FaSignOutAlt } from 'react-icons/fa';
 import { MdLibraryMusic } from 'react-icons/md';
 
 const Sidebar = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
+
   const navItems = [
     { path: '/', label: 'Home', icon: <FaHome /> },
     { path: '/playlists', label: 'Public Playlists', icon: <FaMusic /> },
@@ -13,6 +15,14 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/my-playlists', label: 'My Playlists', icon: <FaList /> },
     { path: '/create-playlist', label: 'Create Playlist', icon: <FaPlus /> },
   ];
+
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to logout?')) {
+      // In real app: clear auth tokens, user data, etc.
+      alert('Logged out successfully! (Dummy action)');
+      navigate('/login');
+    }
+  };
 
   return (
     <>
@@ -31,66 +41,77 @@ const Sidebar = ({ isOpen, onClose }) => {
         bg-black h-screen flex flex-col 
         overflow-y-auto z-50
         transition-transform duration-300 ease-in-out
+        border-r border-[#282828]
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         {/* Logo */}
-        <div className="p-6 pb-4">
+        <div className="px-6 pt-6 pb-4">
           <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-            <FaMusic className="text-[#1db954] text-2xl" />
-            <span className="tracking-tight">Musify</span>
+            <span className="w-9 h-9 bg-[#1db954] rounded-full flex items-center justify-center text-black text-lg font-bold shrink-0">
+              M
+            </span>
+            <span className="tracking-tight">
+              Musi<span className="text-[#1db954]">fy</span>
+            </span>
           </h1>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 px-3 py-2">
-          <ul className="space-y-1">
+          <div className="space-y-1">
             {navItems.map((item) => (
-              <li key={item.path}>
-                <NavLink
-                  to={item.path}
-                  onClick={onClose}
-                  className={({ isActive }) =>
-                    `flex items-center gap-4 px-4 py-3 rounded-lg text-[#b3b3b3] hover:text-white transition-all duration-200 ${
-                      isActive ? 'bg-[#282828] text-white' : 'hover:bg-[#181818]'
-                    }`
-                  }
-                >
-                  <span className="text-xl min-w-[24px] flex justify-center">{item.icon}</span>
-                  <span className="font-semibold text-[15px]">{item.label}</span>
-                </NavLink>
-              </li>
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={onClose}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                    isActive 
+                      ? 'bg-[#282828] text-white border-l-4 border-[#1db954] pl-3' 
+                      : 'text-[#b3b3b3] hover:text-white hover:bg-[#181818]'
+                  }`
+                }
+              >
+                <span className="text-[18px] min-w-5 flex items-center justify-center shrink-0">{item.icon}</span>
+                <span className="font-medium text-[15px] leading-none">{item.label}</span>
+              </NavLink>
             ))}
-          </ul>
+          </div>
 
           {/* Divider */}
-          <div className="border-t border-[#282828] my-6"></div>
+          <div className="border-t border-[#282828] my-5"></div>
 
           {/* Library Section */}
-          <ul className="space-y-1">
+          <div className="space-y-1">
             {libraryItems.map((item) => (
-              <li key={item.path}>
-                <NavLink
-                  to={item.path}
-                  onClick={onClose}
-                  className={({ isActive }) =>
-                    `flex items-center gap-4 px-4 py-3 rounded-lg text-[#b3b3b3] hover:text-white transition-all duration-200 ${
-                      isActive ? 'bg-[#282828] text-white' : 'hover:bg-[#181818]'
-                    }`
-                  }
-                >
-                  <span className="text-xl min-w-[24px] flex justify-center">{item.icon}</span>
-                  <span className="font-semibold text-[15px]">{item.label}</span>
-                </NavLink>
-              </li>
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={onClose}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                    isActive 
+                      ? 'bg-[#282828] text-white border-l-4 border-[#1db954] pl-3' 
+                      : 'text-[#b3b3b3] hover:text-white hover:bg-[#181818]'
+                  }`
+                }
+              >
+                <span className="text-[18px] min-w-5 flex items-center justify-center shrink-0">{item.icon}</span>
+                <span className="font-medium text-[15px] leading-none">{item.label}</span>
+              </NavLink>
             ))}
-          </ul>
+          </div>
         </nav>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-[#282828] mt-auto">
-          <p className="text-xs text-[#b3b3b3] text-center font-medium">
-            © 2025 Musify
-          </p>
+        {/* Logout Button */}
+        <div className="px-3 pb-4 pt-2 border-t border-[#282828] mt-auto">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-[#b3b3b3] hover:text-red-400 hover:bg-[#181818] transition-all duration-200"
+          >
+            <FaSignOutAlt size={18} className="min-w-5 shrink-0" />
+            <span className="font-medium text-[15px] leading-none">Logout</span>
+          </button>
         </div>
       </aside>
     </>

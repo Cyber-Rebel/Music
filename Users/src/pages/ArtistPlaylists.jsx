@@ -6,7 +6,7 @@ const ArtistPlaylists = () => {
   const artistPlaylists = playlists.filter(p => p.creator !== 'You');
 
   return (
-    <div className="p-6">
+    <div className="px-4 py-6 sm:p-6">
       <h1 className="text-4xl font-bold text-white mb-8">Artist Playlists</h1>
       <p className="text-[#b3b3b3] mb-6">Curated playlists by your favorite artists</p>
       

@@ -16,15 +16,15 @@ const MyPlaylists = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-8">
+    <div className="px-4 py-6 sm:p-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-4xl font-bold text-white mb-2">My Playlists</h1>
           <p className="text-[#b3b3b3]">Your personal collection</p>
         </div>
         <button
           onClick={() => navigate('/create-playlist')}
-          className="bg-[#1db954] text-black px-6 py-3 rounded-full font-semibold hover:scale-105 transition-transform"
+          className="bg-[#1db954] text-black px-6 py-3 rounded-full font-semibold hover:scale-105 transition-transform w-full md:w-auto"
         >
           Create New Playlist
         </button>
@@ -83,7 +83,7 @@ const MyPlaylists = () => {
           </p>
           <button
             onClick={() => navigate('/create-playlist')}
-            className="bg-[#1db954] text-black px-8 py-3 rounded-full font-semibold hover:scale-105 transition-transform"
+            className="bg-[#1db954] text-black px-8 py-3 rounded-full font-semibold hover:scale-105 transition-transform w-full sm:w-auto"
           >
             Create Your First Playlist
           </button>
