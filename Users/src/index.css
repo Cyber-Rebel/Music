@@ -8,12 +8,7 @@
   --text-primary: #ffffff;
   --text-secondary: #b3b3b3;
 }
-/* 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-} */
+
 
 body {
   font-family: 'Circular', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;

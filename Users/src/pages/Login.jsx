@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaMusic, FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import axios from 'axios';
 
 const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -17,17 +21,34 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login data:', formData);
-    alert('Login successful! (Dummy action)');
-    navigate('/');
+    setLoading(true);
+
+    try {
+      const res = await axios.post(
+        'http://localhost:3000/api/auth/login',
+        formData,
+        { withCredentials: true }
+      );
+
+      alert('Login successful!');
+      console.log('User Logged In:', res.data);
+
+      navigate('/artist/dashboard');
+
+    } catch (err) {
+      console.error('Login Error:', err);
+      alert(err.response?.data?.message || 'Login failed');
+    }
+
+    setLoading(false);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(circle_at_top_left,_#1db954_0%,_#0a0a0a_45%,_#000_100%)]">
-
       <div className="w-full max-w-lg">
+
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-4">
@@ -43,7 +64,7 @@ const Login = () => {
           <h2 className="text-3xl font-bold text-white mb-6 text-center">Log In</h2>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-
+            
             {/* Email Input */}
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-white mb-2">
@@ -111,10 +132,11 @@ const Login = () => {
             {/* Submit */}
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-[#1db954] hover:bg-[#1ed760] text-black font-bold py-3.5 rounded-full 
-              transition-all hover:scale-105 shadow-lg text-base"
+              transition-all hover:scale-105 shadow-lg text-base disabled:opacity-50"
             >
-              Log In
+              {loading ? 'Logging in...' : 'Log In'}
             </button>
           </form>
 
