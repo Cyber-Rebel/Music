@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 const SongCard = ({ song }) => {
   const navigate = useNavigate();
-
+console.log(song)
   return (
     <div
       onClick={() => navigate(`/song/${song._id}`)}

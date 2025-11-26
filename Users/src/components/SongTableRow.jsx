@@ -19,7 +19,7 @@ const SongTableRow = ({ song, index }) => {
   };
 
   return (
-    <tr className="hover:bg-[#282828] transition-colors group cursor-pointer">
+    <tr className="hover:bg-[#361a1a] transition-colors group cursor-pointer">
       <td className="py-3 px-4 text-[#b3b3b3] w-12">
         <span className="group-hover:hidden">{index + 1}</span>
         <FaPlay className="hidden group-hover:block text-white text-sm" />

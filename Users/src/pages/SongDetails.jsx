@@ -1,96 +1,261 @@
-import { useParams } from 'react-router-dom';
-import { FaPlay, FaHeart, FaShare } from 'react-icons/fa';
-import { useState, useEffect } from 'react';
+import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { FaPlay, FaPause, FaHeart, FaShare, FaArrowLeft, FaVolumeUp, FaRandom, FaRedo } from 'react-icons/fa';
+import { useMusicPlayer } from '../contexts/MusicContext';
 import SongCard from '../components/SongCard';
-import { songs } from '../data/dummyData';
 
 const SongDetails = () => {
   const { id } = useParams();
-  const song = songs.find(s => s.id === parseInt(id)) || songs[0];
-  const [isLiked, setIsLiked] = useState(false);
-  const [likes, setLikes] = useState(song.likes || 0);
+  const navigate = useNavigate();
+  const {
+    currentSong,
+    isPlaying,
+    currentTime,
+    duration,
+    volume,
+    playSong,
+    togglePlayPause,
+    setVolumeLevel,
+    formatTime
+  } = useMusicPlayer();
   
-  // Get related songs (filter by same artist or random songs)
-  const relatedSongs = songs.filter(s => s.id !== song.id).slice(0, 6);
+  const [songData, setSongData] = useState(null);
+  const [isLiked, setIsLiked] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleLike = () => {
-    if (isLiked) {
-      setLikes(prev => Math.max(0, prev - 1));
-      setIsLiked(false);
-      // TODO: Call API to unlike song
-      console.log('Unlike song:', song.id);
-    } else {
-      setLikes(prev => prev + 1);
-      setIsLiked(true);
-      // TODO: Call API to like song
-      console.log('Like song:', song.id);
+  // Check if this song is currently playing
+  const isCurrentSong = currentSong && currentSong._id === songData?._id;
+
+  // Fetch song data
+  const fetchSong = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`http://localhost:3001/api/music/get-details/${id}`, {
+        withCredentials: true
+      });
+      
+      if (response.data.message === "Music fetched successfully") {
+        setSongData(response.data.music);
+        setError(null);
+      }
+    } catch (error) {
+      console.error('Error fetching song:', error);
+      setError('Failed to load song details');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Reset like state when song changes
+  // Auto-play when song data loads
   useEffect(() => {
-    setIsLiked(false);
-    setLikes(song.likes || 0);
-  }, [song.id, song.likes]);
+    if (songData) {
+      playSong(songData);
+    }
+  }, [songData, playSong]);
+
+  // Fetch song on component mount
+  useEffect(() => {
+    fetchSong();
+  }, [id]);
+
+  // Audio event handlers
+  const handlePlayPause = () => {
+    if (isCurrentSong) {
+      togglePlayPause();
+    } else {
+      playSong(songData);
+    }
+  };
+
+  const handleSeek = (e) => {
+    const progressBar = e.currentTarget;
+    const clickX = e.nativeEvent.offsetX;
+    const width = progressBar.offsetWidth;
+    const newTime = (clickX / width) * duration;
+    
+    // Use context seekTo method
+    if (isCurrentSong && duration) {
+      const { seekTo } = useMusicPlayer();
+      seekTo(newTime);
+    }
+  };
+
+  const handleVolumeChange = (e) => {
+    const newVolume = parseFloat(e.target.value);
+    setVolumeLevel(newVolume);
+  };
+
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    // TODO: Call API to like/unlike song
+  };
+
+  const getProgressPercentage = () => {
+    return isCurrentSong && duration ? (currentTime / duration) * 100 : 0;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#1a1a1a] to-[#121212] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#1db954] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading song...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !songData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#1a1a1a] to-[#121212] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400 text-xl mb-4">{error || 'Song not found'}</p>
+          <button 
+            onClick={() => navigate(-1)}
+            className="bg-[#1db954] text-white px-6 py-3 rounded-full hover:bg-[#1ed760] transition-colors"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#1a5c3c] via-[#121212] to-[#121212]">
-      {/* Banner Section */}
-      <div
-        className="relative min-h-72 sm:h-96 flex items-end p-6 sm:p-8 pb-10 sm:pb-6"
-        style={{
-          background: `linear-gradient(180deg, rgba(29, 185, 84, 0.6) 0%, rgba(18, 18, 18, 0.8) 100%),
-                      url(${song.cover}) center/cover`
-        }}
-      >
-        <div className="flex flex-col sm:flex-row sm:items-end items-center gap-4 sm:gap-6 text-center sm:text-left w-full">
-          <img
-            src={song.cover}
-            alt={song.title}
-            className="w-40 h-40 sm:w-56 sm:h-56 rounded-lg shadow-2xl"
-          />
-          <div className="space-y-2">
-            <p className="text-sm font-semibold text-white uppercase tracking-wide">Song</p>
-            <h1 className="text-4xl sm:text-6xl font-bold text-white leading-tight">{song.title}</h1>
-            <div className="flex items-center justify-center sm:justify-start gap-2 text-white text-sm sm:text-base">
-              <span className="font-semibold">{song.artist}</span>
+      {/* Header with back button */}
+      <div className="p-4 sm:p-6">
+        <button 
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-white hover:text-[#1db954] transition-colors mb-6"
+        >
+          <FaArrowLeft className="text-xl" />
+          <span className="text-lg font-medium">Back</span>
+        </button>
+      </div>
+
+      {/* Main Content */}
+      <div className="px-4 sm:px-6 pb-32">
+        {/* Song Info Section */}
+        <div className="flex flex-col lg:flex-row items-center lg:items-end gap-8 mb-8">
+          <div className="relative group">
+            <img
+              src={songData.coverUrl}
+              alt={songData.title}
+              className="w-64 h-64 sm:w-80 sm:h-80 rounded-lg shadow-2xl object-cover"
+              onError={(e) => {
+                e.target.src = 'https://placehold.co/300x300/1db954/ffffff?text=Music';
+              }}
+            />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+              <button 
+                onClick={handlePlayPause}
+                className="bg-[#1db954] text-black p-6 rounded-full hover:scale-110 transition-transform shadow-xl"
+              >
+                {isCurrentSong && isPlaying ? <FaPause className="text-2xl" /> : <FaPlay className="text-2xl ml-1" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="text-center lg:text-left flex-1">
+            <p className="text-sm font-semibold text-white/80 uppercase tracking-wide mb-2">Song</p>
+            <h1 className="text-4xl sm:text-6xl lg:text-8xl font-bold text-white leading-tight mb-4">
+              {songData.title}
+            </h1>
+            <div className="flex items-center justify-center lg:justify-start gap-2 text-white text-lg sm:text-xl mb-6">
+              <span className="font-semibold">{songData.artist}</span>
               <span>•</span>
-              <span>{song.duration}</span>
+              <span>{new Date(songData.createdAt).getFullYear()}</span>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Action Buttons */}
-      <div className="px-4 sm:px-8 py-8 flex flex-wrap items-center gap-3 sm:gap-4 bg-gradient-to-b from-black/40 to-transparent">
-        <button className="bg-[#1db954] text-black px-8 sm:px-10 py-3.5 sm:py-4 rounded-full font-bold hover:scale-105 hover:bg-[#1ed760] transition-transform flex items-center justify-center gap-2 text-base shadow-xl w-full sm:w-auto">
-          <FaPlay className="text-base" />
-          <span>Play</span>
-        </button>
-        <button 
-          onClick={handleLike}
-          className={`border-2 px-8 py-3.5 rounded-full font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2 text-base w-full sm:w-auto ${
-            isLiked 
-              ? 'border-[#1db954] text-[#1db954] bg-[#1db954]/10' 
-              : 'border-[#7f7f7f] text-white hover:border-white bg-white/5'
-          }`}
-        >
-          <FaHeart className={`text-base ${isLiked ? 'text-[#1db954]' : ''}`} />
-          <span>{isLiked ? 'Liked' : 'Like'} {likes > 0 ? `(${likes})` : ''}</span>
-        </button>
-        <button className="border-2 border-[#7f7f7f] text-white px-8 py-3.5 rounded-full font-semibold hover:border-white hover:scale-105 transition-transform flex items-center justify-center gap-2 text-base bg-white/5 w-full sm:w-auto">
-          <FaShare className="text-base" />
-          <span>Share</span>
-        </button>
-      </div>
+        {/* Control Buttons */}
+        <div className="flex flex-wrap items-center gap-4 mb-8">
+          <button 
+            onClick={handlePlayPause}
+            className="bg-[#1db954] text-black px-8 py-4 rounded-full font-bold hover:scale-105 hover:bg-[#1ed760] transition-all flex items-center gap-3 text-lg shadow-xl"
+          >
+            {isCurrentSong && isPlaying ? <FaPause className="text-xl" /> : <FaPlay className="text-xl" />}
+            <span>{isCurrentSong && isPlaying ? 'Pause' : 'Play'}</span>
+          </button>
+          
+          <button 
+            onClick={handleLike}
+            className={`p-4 rounded-full border-2 transition-all ${
+              isLiked 
+                ? 'bg-[#1db954] border-[#1db954] text-black' 
+                : 'border-[#7f7f7f] text-white hover:border-white hover:scale-105'
+            }`}
+          >
+            <FaHeart className="text-xl" />
+          </button>
+          
+          <button className="p-4 rounded-full border-2 border-[#7f7f7f] text-white hover:border-white hover:scale-105 transition-all">
+            <FaShare className="text-xl" />
+          </button>
+          
+          <button className="p-4 rounded-full border-2 border-[#7f7f7f] text-white hover:border-white hover:scale-105 transition-all">
+            <FaRandom className="text-xl" />
+          </button>
+          
+          <button className="p-4 rounded-full border-2 border-[#7f7f7f] text-white hover:border-white hover:scale-105 transition-all">
+            <FaRedo className="text-xl" />
+          </button>
+        </div>
 
-      {/* Related Songs Section */}
-      <div className="px-4 sm:px-8 py-8 pt-12">
-        <h2 className="text-2xl font-bold text-white mb-8">Related Songs</h2>
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-6">
-          {relatedSongs.map((relatedSong) => (
-            <SongCard key={relatedSong.id} song={relatedSong} />
-          ))}
+        {/* Progress Bar and Controls - Only show if this song is currently playing */}
+        {isCurrentSong && (
+          <div className="bg-[#181818] rounded-lg p-6 mb-8">
+            <div className="flex items-center gap-4 mb-4">
+              <span className="text-[#b3b3b3] text-sm min-w-10">
+                {formatTime(currentTime)}
+              </span>
+              <div 
+                className="flex-1 h-2 bg-[#4f4f4f] rounded-full cursor-pointer relative"
+                onClick={handleSeek}
+              >
+                <div 
+                  className="absolute top-0 left-0 h-full bg-[#1db954] rounded-full transition-all"
+                  style={{ width: `${getProgressPercentage()}%` }}
+                />
+                <div 
+                  className="absolute top-1/2 w-4 h-4 bg-white rounded-full shadow-lg transform -translate-y-1/2 transition-all hover:scale-125"
+                  style={{ left: `${getProgressPercentage()}%`, transform: 'translate(-50%, -50%)' }}
+                />
+              </div>
+              <span className="text-[#b3b3b3] text-sm min-w-10">
+                {formatTime(duration)}
+              </span>
+            </div>
+            
+            {/* Volume Control */}
+            <div className="flex items-center gap-3">
+              <FaVolumeUp className="text-[#b3b3b3]" />
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={volume}
+                onChange={handleVolumeChange}
+                className="w-24 accent-[#1db954]"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Song Info */}
+        <div className="bg-[#181818] rounded-lg p-6">
+          <h3 className="text-white text-xl font-bold mb-4">About this song</h3>
+          <div className="space-y-3 text-[#b3b3b3]">
+            <p><span className="text-white font-medium">Artist:</span> {songData.artist}</p>
+            <p><span className="text-white font-medium">Release Date:</span> {new Date(songData.createdAt).toLocaleDateString()}</p>
+            <p><span className="text-white font-medium">Duration:</span> {isCurrentSong ? formatTime(duration) : 'Unknown'}</p>
+            <p><span className="text-white font-medium">File Format:</span> MP3</p>
+          </div>
         </div>
       </div>
     </div>
