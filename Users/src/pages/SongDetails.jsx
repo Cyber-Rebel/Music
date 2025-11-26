@@ -13,20 +13,9 @@ const SongDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [songData ,songsetdata]=useState()
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await dispatch(specificMusicData(id));
-        songsetdata(result);
-      } catch (error) {
-        console.error('Error fetching song data:', error);
-      }
-    };
-    fetchData();
-  }, [id, dispatch]);
-  // Redux state
-  const { currentMusic, allMusic } = useSelector((state) => state.music);
+  
+  // Redux state - rename currentMusic to songData for use in component
+  const { currentMusic: songData, allMusic } = useSelector((state) => state.music);
   console.log("----------------------------->", songData, allMusic);
 
   const {
@@ -74,6 +63,12 @@ const SongDetails = () => {
     }
   };
 
+  // Fetch song on component mount
+  useEffect(() => {
+    fetchSong();
+    fetchAllSongs();
+  }, [id]);
+
   // Auto-play when song data loads
   useEffect(() => {
     if (songData && allSongs.length > 0) {
@@ -81,13 +76,7 @@ const SongDetails = () => {
       const fullPlaylist = [songData, ...allSongs];
       playSong(songData, fullPlaylist);
     }
-  }, [songData, allSongs.length]);
-
-  // Fetch song on component mount
-  useEffect(() => {
-    fetchSong();
-    fetchAllSongs();
-  }, [id, dispatch]);
+  }, [songData?._id, allSongs.length]);
 
   // Audio event handlers
   const handlePlayPause = () => {
@@ -95,7 +84,6 @@ const SongDetails = () => {
       togglePlayPause();
     } else {
       playSong(songData);
-      // isPlaying(false)
     }
   };
 
