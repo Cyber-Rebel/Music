@@ -17,6 +17,7 @@ const MusicPlayer = () => {
   } = useMusicPlayer();
 
   const sliderVars = useMemo(() => {
+    
     const progress = duration ? (currentTime / duration) * 100 : 0;
     const volumePercent = volume * 100;
     return {
@@ -41,8 +42,11 @@ const nextplay=()=>{
   }, [isPlaying, audioRef]);
 
   const handleSeek = (event) => {
+        audioRef.current.pause();
+    
     const newProgress = Number(event.target.value);
     const newTime = (newProgress / 100) * duration;
+    
     seekTo(newTime);
   };
 
