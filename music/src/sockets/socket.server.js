@@ -60,6 +60,7 @@ io.on("connection", (socket) => {
     socket.on('createroom',({roomId, password })=>{
         if(room.has(roomId)){
             socket.emit('roomError',{success:false, message:'Room ID already exists'});
+            return;
         }
         room.set(roomId ,{password , users:[socket.user.id]})
         socket.join(roomId) // jo user room create karega wo usme join ho jayega default like admin
@@ -112,6 +113,25 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () => {
         socket.leave(socket.user.id) // hamre resouce kam katam ho esliye 
         onlineUsers.delete(socket.user.email);
+          room.forEach((value, key) => {
+        const users = value.users;
+        const index = users.indexOf(socket.user.id);
+
+        if (index !== -1) {
+            users.splice(index, 1); // remove user
+            
+            // If room empty → delete it
+            if (users.length === 0) {
+                room.delete(key);
+                console.log("Room deleted:", key);
+            } else {
+                room.set(key, value); // ensure updated
+            }
+        }
+    });
+
+
+
         socket.broadcast.emit("user-offline", {
             email: socket.user.email,
             status: "offline",
