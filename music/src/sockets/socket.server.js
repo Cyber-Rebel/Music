@@ -63,6 +63,7 @@ io.on("connection", (socket) => {
             return;
         }
         room.set(roomId ,{password , users:[socket.user.id]})
+        // console.log("Room ", room);
         socket.join(roomId) // jo user room create karega wo usme join ho jayega default like admin
          socket.emit("roomCreated", roomId);
     })
@@ -84,6 +85,7 @@ io.on("connection", (socket) => {
 
         socket.join(roomId);
         socket.emit("roomJoined", roomId);
+        // console.log("The room state after joining: ",room)
 
     })
     socket.on('send-audio',({roomId, 
@@ -129,6 +131,8 @@ io.on("connection", (socket) => {
             }
         }
     });
+    console.log(`User disconnected: ${socket.user.email}`);
+    console.log('The room state: ',room)
 
 
 
