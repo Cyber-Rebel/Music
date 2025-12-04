@@ -225,9 +225,11 @@ const ControlRoom = () => {
 
   // Broadcast audio to room when song changes or plays
   useEffect(() => {
+    console.log(isPlaying ? "Playing" : "Paused", "song:");
     if (currentSong && sessionCreated && roomData?.code) {
       socketInstance.emit('send-audio', {
         roomId: roomData.code,
+        isPlaying: isPlaying,
         src: currentSong.musicUrl,
         senderDetails: {
           name: user?.fullName ? `${user.fullName.firstName} ${user.fullName.lastName}` : 'Host',
@@ -262,6 +264,24 @@ const ControlRoom = () => {
     setIsChecking(true);
     socketInstance.emit('check-user-online', checkEmail);
     setCheckEmail('');
+  };
+
+  // Send session invite to a user
+  const handleSendSessionInvite = (email, code, password) => {
+    console.log("Sending session invite to:", email, "Code:", code, "Password:", password);
+    socketInstance.emit('send-session-invite', {
+      targetEmail: email,
+      sessionCode: code,
+      sessionPassword: password,
+      senderName: user?.fullName ? `${user.fullName.firstName} ${user.fullName.lastName}` : 'Host'
+    });
+    
+    // Update UI to show invite was sent
+    setCheckedUsers(prev => 
+      prev.map(u => 
+        u.email === email ? { ...u, inviteSent: true } : u
+      )
+    );
   };
 
   useEffect(() => {
@@ -554,6 +574,10 @@ const ControlRoom = () => {
             setCheckedUsers={setCheckedUsers}
             isChecking={isChecking}
             handleCheckUserOnline={handleCheckUserOnline}
+            sessionCode={roomData?.code}
+            sessionPassword={roomData?.password}
+            sessionCreated={sessionCreated}
+            onSendInvite={handleSendSessionInvite}
           />
 
           {/* End Session Button */}

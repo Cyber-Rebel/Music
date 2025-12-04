@@ -1,4 +1,4 @@
-import { FaSearch, FaCircle, FaTimes, FaSpinner } from 'react-icons/fa';
+import { FaSearch, FaCircle, FaTimes, FaSpinner, FaPaperPlane } from 'react-icons/fa';
 
 const CheckUserOnline = ({ 
   checkEmail, 
@@ -6,7 +6,11 @@ const CheckUserOnline = ({
   checkedUsers, 
   setCheckedUsers,
   isChecking, 
-  handleCheckUserOnline
+  handleCheckUserOnline,
+  sessionCode,
+  sessionPassword,
+  sessionCreated,
+  onSendInvite
 }) => {
   const handleCheck = () => {
     if (checkEmail.trim()) {
@@ -21,6 +25,12 @@ const CheckUserOnline = ({
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleCheck();
+    }
+  };
+
+  const handleSendInvite = (email) => {
+    if (sessionCode && sessionPassword && onSendInvite) {
+      onSendInvite(email, sessionCode, sessionPassword);
     }
   };
 
@@ -83,6 +93,23 @@ const CheckUserOnline = ({
                 }`}>
                   {user.isOnline ? 'Online' : 'Offline'}
                 </span>
+                {/* Send Invite Button - Only for online users when session is created */}
+                {user.isOnline && sessionCreated && (
+                  user.inviteSent ? (
+                    <span className="flex items-center gap-1 px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-medium">
+                      ✓ Sent
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => handleSendInvite(user.email)}
+                      className="flex items-center gap-1 px-3 py-1 bg-[#1db954] text-black rounded-full text-xs font-medium hover:bg-[#1ed760] transition-colors"
+                      title="Send session invite"
+                    >
+                      <FaPaperPlane className="text-[10px]" />
+                      Send
+                    </button>
+                  )
+                )}
                 <button
                   onClick={() => handleRemoveUser(user.email)}
                   className="text-[#b3b3b3] hover:text-white transition-colors"

@@ -90,21 +90,40 @@ io.on("connection", (socket) => {
     })
     socket.on('send-audio',({roomId, 
   src, 
+  isPlaying,
   senderDetails,
   thumbnail, 
   currentTime, 
   volume })=>{
 // broadcast to sabko send kar dega except sender ko
 //  console.log("Audio data received for room:",  src , senderDetails, roomId, thumbnail, currentTime, volume);
-
+console.log(isPlaying? "Playing" : "Paused", "audio for room:", roomId);
 
         socket.broadcast.to(roomId).emit('receive-audio', {
              src,
              senderDetails,
+             isPlaying,
     thumbnail,
     currentTime,
     volume
         }); 
+    })
+
+    // Send session invite to a specific user
+    socket.on('send-session-invite', ({ targetEmail, sessionCode, sessionPassword, senderName }) => {
+        console.log("Sending session invite to:", targetEmail);
+        const targetSocketId = onlineUsers.get(targetEmail);
+        if (targetSocketId) {
+            io.to(targetSocketId).emit('session-invite', {
+                sessionCode,
+                sessionPassword,
+                senderName,
+                senderEmail: socket.user.email
+            });
+            console.log("Session invite sent to:", targetEmail);
+        } else {
+            console.log("User not online:", targetEmail);
+        }
     })
 
 

@@ -119,7 +119,7 @@ const JoinFriends = () => {
         artist: data.senderDetails?.name || 'Host',
         currentTime: data.currentTime || 0,
         volume: data.volume || 0.7,
-        isPlaying: true,
+        isPlaying: data.isPlaying,
         senderDetails: data.senderDetails
       });
       
@@ -132,12 +132,21 @@ const JoinFriends = () => {
         artist: data.senderDetails?.name || 'Host'
       }));
 
-      // Play the audio
+      // Play or pause audio based on host's isPlaying state
       if (audioRef.current) {
-        audioRef.current.src = data.src;
+        // Update src only if it changed
+        if (audioRef.current.src !== data.src) {
+          audioRef.current.src = data.src;
+        }
         audioRef.current.currentTime = data.currentTime || 0;
         audioRef.current.volume = data.volume || 0.7;
-        audioRef.current.play().catch(err => console.log('Autoplay blocked:', err));
+        
+        // Play or pause based on isPlaying
+        if (data.isPlaying) {
+          audioRef.current.play().catch(err => console.log('Autoplay blocked:', err));
+        } else {
+          audioRef.current.pause();
+        }
       }
     });
 

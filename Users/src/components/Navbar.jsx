@@ -1,8 +1,9 @@
-import { FaSearch, FaBars, FaChevronDown, FaBell, FaUser, FaCog, FaSignOutAlt, FaRobot, FaTimes, FaPalette, FaGlobe, FaMicrophone, FaLock, FaBaby, FaCircle } from 'react-icons/fa';
+import { FaSearch, FaBars, FaChevronDown, FaBell, FaUser, FaCog, FaSignOutAlt, FaRobot, FaTimes, FaPalette, FaGlobe, FaMicrophone, FaLock, FaBaby, FaCircle, FaBroadcastTower } from 'react-icons/fa';
 import { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logoutUser } from '../Store/actions/userAction';
+import socketInstance from '../socket.service.js';
 
 const Navbar = ({ onMenuClick }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -12,8 +13,56 @@ const Navbar = ({ onMenuClick }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   
+  // Session Invite State
+  const [sessionInvite, setSessionInvite] = useState(null);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [hasNewNotification, setHasNewNotification] = useState(false);
+  
   // Get user from Redux store
   const { user, isAuthenticated } = useSelector((state) => state.user);
+
+  // Listen for session invites
+  useEffect(() => {
+    socketInstance.on('session-invite', (data) => {
+      console.log("Received session invite:", data);
+      setSessionInvite(data);
+      setHasNewNotification(true);
+    });
+
+    return () => {
+      socketInstance.off('session-invite');
+    };
+  }, []);
+
+  // Handle accepting invite
+  const handleAcceptInvite = () => {
+    if (sessionInvite) {
+      setShowInviteModal(false);
+      setHasNewNotification(false);
+      // Navigate to join-friends and auto-join
+      socketInstance.emit('joinroom', {
+        roomId: sessionInvite.sessionCode,
+        password: sessionInvite.sessionPassword
+      });
+      setSessionInvite(null);
+      navigate('/join-friends');
+    }
+  };
+
+  // Handle declining invite
+  const handleDeclineInvite = () => {
+    setShowInviteModal(false);
+    setSessionInvite(null);
+    setHasNewNotification(false);
+  };
+
+  // Handle clicking notification bell to open modal
+  const handleNotificationClick = () => {
+    if (sessionInvite) {
+      setShowInviteModal(true);
+      setHasNewNotification(false);
+    }
+  };
 
   // Close settings when clicking outside
   useEffect(() => {
@@ -369,8 +418,17 @@ const Navbar = ({ onMenuClick }) => {
         {/* Right Section - Notifications and Profile */}
         <div className="flex items-center gap-3 lg:gap-4" ref={settingsRef}>
           {/* Notification Bell */}
-          <button className="hidden sm:flex items-center justify-center w-9 h-9 text-[#b3b3b3] hover:text-white hover:bg-[#282828] rounded-full transition-all">
+          <button 
+            onClick={handleNotificationClick}
+            className="relative hidden sm:flex items-center justify-center w-9 h-9 text-[#b3b3b3] hover:text-white hover:bg-[#282828] rounded-full transition-all"
+          >
             <FaBell className="text-sm" />
+            {/* Notification Badge */}
+            {hasNewNotification && sessionInvite && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#1db954] rounded-full flex items-center justify-center text-[10px] text-black font-bold animate-pulse">
+                1
+              </span>
+            )}
           </button>
 
           {/* Profile Dropdown */}
@@ -393,6 +451,68 @@ const Navbar = ({ onMenuClick }) => {
           </div>
         </div>
       </nav>
+
+      {/* Session Invite Modal */}
+      {showInviteModal && sessionInvite && (
+        <>
+          {/* Blur Background */}
+          <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-50"
+            onClick={handleDeclineInvite}
+          />
+          
+          {/* Modal Content */}
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+            <div className="w-full max-w-sm bg-[#181818] rounded-2xl p-6 border border-[#1db954] shadow-2xl">
+              {/* Broadcast Icon */}
+              <div className="flex justify-center mb-5">
+                <div className="w-16 h-16 bg-[#1db954] rounded-full flex items-center justify-center animate-pulse">
+                  <FaBroadcastTower className="text-2xl text-white" />
+                </div>
+              </div>
+
+              <h2 className="text-xl font-bold text-white text-center mb-2">
+                Session Invite!
+              </h2>
+              <p className="text-[#b3b3b3] text-center text-sm mb-5">
+                <span className="text-white font-semibold">{sessionInvite.senderName}</span> invited you to join their music session
+              </p>
+
+              {/* Session Details */}
+              <div className="bg-[#282828] rounded-lg p-4 mb-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-[#b3b3b3] text-sm">Session Code:</span>
+                  <span className="text-[#1db954] font-mono font-bold">{sessionInvite.sessionCode}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[#b3b3b3] text-sm">Password:</span>
+                  <span className="text-white font-mono">••••••••</span>
+                </div>
+              </div>
+
+              <p className="text-[#535353] text-xs text-center mb-4">
+                🔐 Password will be auto-filled when you join
+              </p>
+
+              {/* Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleDeclineInvite}
+                  className="flex-1 py-2.5 rounded-full border border-[#404040] text-white hover:bg-[#282828] transition-colors"
+                >
+                  Decline
+                </button>
+                <button
+                  onClick={handleAcceptInvite}
+                  className="flex-1 py-2.5 rounded-full bg-[#1db954] text-black font-semibold hover:bg-[#1ed760] transition-colors"
+                >
+                  Join Now
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Settings Modal */}
       {isSettingsOpen && <SettingsModal />}
