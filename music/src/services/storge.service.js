@@ -40,7 +40,18 @@ async function uploadMusicAndCover(audioFile, coverImage) {
     } catch (error) {
         throw new Error('File upload failed: ' + error);
     }
+
 }
+async function  playlistCoverUpload(coverImage){
+  
+    try {
+        const coverImageUploadResult = await uploadToImagekit(coverImage.buffer, 'music-files-playlist-cover', '.' + 'jpg');
+        return coverImageUploadResult;
+    } catch (error) {
+        throw new Error('Playlist cover upload failed: ' + error);
+    }
+} 
 
 
-module.exports= {uploadMusicAndCover};
+
+module.exports= {uploadMusicAndCover, playlistCoverUpload};

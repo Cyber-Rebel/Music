@@ -2,13 +2,30 @@ const express = require('express');
 const router = express.Router();
 const authMiddlware = require('../middlewares/auth.middleware.js');
 const musicController = require('../controllers/music.controller.js');
+const moodMiddleware = require('../middlewares/mood.middleware.js');
 const multer = require('multer');
 const upload = multer({
     storage: multer.memoryStorage()
 })
+
+
+
+
+
+router.post('/songdectect',upload.single('music'),moodMiddleware.musicMoodDectect,musicController.musicMoodDectect);
+
+
+
+
 // for upload music :- Artist only
 router.post('/upload',authMiddlware.authArtistMiddleware,
-    upload.fields([{ name: 'music', maxCount: 1 }, { name: 'coverImage', maxCount: 1 }]),musicController.uploadMusic);
+    upload.fields([{ name: 'music', maxCount: 1 }, { name: 'coverImage', maxCount: 1 }]),moodMiddleware.musicMoodDectect,musicController.uploadMusic);
+
+
+
+
+
+
 // for all  song fetch home page user ke liye 
 router.get('/',authMiddlware.authUserMiddleware, musicController.getAllMusic);    
 // for get music by id
@@ -17,8 +34,23 @@ router.get('/get-details/:id',authMiddlware.authUserMiddleware, musicController.
 router.get('/artist-music',authMiddlware.authArtistMiddleware, musicController.getArtistMusic);
 // for get all playlists for jo playlist artist ne banayi hae use user ke liye sho remian image fetch remain
 router.get('/allPlaylist',authMiddlware.authUserMiddleware,musicController.getAllPlaylists);
+
+
+
+
 // for create playlist :- Artist only add image upload ka option add karna
-router.post('/playlist',authMiddlware.authArtistMiddleware,musicController.createPlaylist);
+router.post('/playlist',authMiddlware.authArtistMiddleware,upload.single('coverImage'),musicController.createPlaylist);
+
+
+
+
+
+
+
+
+
+
+
 // 
 router.get('/playlist',authMiddlware.authUserMiddleware,musicController.getPlaylists);
 

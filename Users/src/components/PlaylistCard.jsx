@@ -12,7 +12,7 @@ const PlaylistCard = ({ playlist }) => {
 
       <div className="relative mb-4">
         <img
-          src={playlist.cover}
+          src={playlist.coverUrl}
           alt={playlist.title}
           className="w-full aspect-square object-cover rounded-md"
         />

@@ -1,35 +1,43 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { Check, Upload, X } from "lucide-react";
 import Card from "../components/Card";
 import Input from "../components/Input";
 import Button from "../components/Button";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchArtistTracks, createPlaylist } from "../store/actions/musicaction";
+import { resetCreatePlaylistState } from "../store/slices/musicslice";
 
 const CreatePlaylist = () => {
+  const dispatch = useDispatch();
+  const { artistTracks, loading, createPlaylistLoading, createPlaylistSuccess, createPlaylistError } = useSelector((state) => state.music);
+  
   const [title, setTitle] = useState("");
   const [selectedTracks, setSelectedTracks] = useState([]);
-  const [artistTracks, setArtistTracks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [coverImage, setCoverImage] = useState(null);
+  const [coverPreview, setCoverPreview] = useState(null);
+  const fileInputRef = useRef(null);
 
   // Fetch real uploaded tracks of artist
   useEffect(() => {
-    const fetchTracks = async () => {
-      try {
-        const res = await axios.get(
-          "http://localhost:3001/api/music/artist-music",
-          { withCredentials: true }
-        );
-        setArtistTracks(res.data.musics || []);
-      } catch (err) {
-        console.error("Error fetching artist music:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    dispatch(fetchArtistTracks());
+  }, [dispatch]);
 
-    fetchTracks();
-  }, []);
+  // Handle playlist creation success
+  useEffect(() => {
+    if (createPlaylistSuccess) {
+      alert("Playlist created successfully!");
+      setTitle("");
+      setSelectedTracks([]);
+      setCoverImage(null);
+      setCoverPreview(null);
+      dispatch(resetCreatePlaylistState());
+    }
+    if (createPlaylistError) {
+      alert(createPlaylistError);
+      dispatch(resetCreatePlaylistState());
+    }
+  }, [createPlaylistSuccess, createPlaylistError, dispatch]);
 
   const toggleTrack = (id) => {
     if (selectedTracks.includes(id)) {
@@ -39,26 +47,34 @@ const CreatePlaylist = () => {
     }
   };
 
+  const handleCoverImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setCoverImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCoverPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeCoverImage = () => {
+    setCoverImage(null);
+    setCoverPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    try {
-      const res = await axios.post(
-        "http://localhost:3001/api/music/playlist",
-        { title, musics: selectedTracks },
-        { withCredentials: true }
-      );
-
-      alert("Playlist created successfully!");
-      console.log("Playlist:", res.data);
-
-      setTitle("");
-      setSelectedTracks([]);
-
-    } catch (error) {
-      console.error("Error creating playlist:", error);
-      alert("Error creating playlist");
-    }
+    
+    dispatch(createPlaylist({
+      title,
+      musics: selectedTracks,
+      coverImage,
+    }));
   };
 
   return (
@@ -79,6 +95,49 @@ const CreatePlaylist = () => {
       <form onSubmit={handleSubmit}>
         <Card className="mb-8">
           <div className="flex flex-col gap-6">
+
+            {/* Cover Image Upload */}
+            <div>
+              <label className="text-sm font-medium text-(--color-text-secondary) mb-3 block">
+                Cover Image
+              </label>
+              <div className="flex items-center gap-4">
+                {coverPreview ? (
+                  <div className="relative">
+                    <img
+                      src={coverPreview}
+                      alt="Cover preview"
+                      className="w-24 h-24 rounded-lg object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={removeCoverImage}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-24 h-24 border-2 border-dashed border-(--color-border-subtle) rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-(--color-accent-green) transition-colors"
+                  >
+                    <Upload size={24} className="text-(--color-text-secondary)" />
+                    <span className="text-xs text-(--color-text-secondary) mt-1">Upload</span>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleCoverImageChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <div className="text-sm text-(--color-text-secondary)">
+                  <p>Upload a cover image for your playlist</p>
+                </div>
+              </div>
+            </div>
 
             <Input
               label="Playlist Title"
@@ -161,9 +220,9 @@ const CreatePlaylist = () => {
               <Button
                 type="submit"
                 variant="primary"
-                disabled={!title || selectedTracks.length === 0}
+                disabled={!title || selectedTracks.length === 0 || createPlaylistLoading}
               >
-                Create Playlist
+                {createPlaylistLoading ? "Creating..." : "Create Playlist"}
               </Button>
             </div>
           </div>

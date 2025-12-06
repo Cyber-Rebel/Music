@@ -14,7 +14,10 @@ const playlistSchema = new mongoose.Schema({
     },
     musics: [{
         type: mongoose.Schema.Types.ObjectId,
-    }]
+    }],
+    coverUrl: {
+        type: String,
+    }
 }, { timestamps: true });
 
 const Playlist = mongoose.model('playlist', playlistSchema);

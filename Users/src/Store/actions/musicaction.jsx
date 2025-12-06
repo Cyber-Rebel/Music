@@ -31,6 +31,7 @@ export const artistPlaylistFetch = () => async (dispatch) => {
        const response = await axios.get('http://localhost:3001/api/music/allPlaylist',{
         withCredentials: true,
        });
+       console.log("Playlist Data Response:", response.data);   
        const playlistData = response.data.playlists || [];
        dispatch(setArtistPlaylist(playlistData));
     } catch (error) {

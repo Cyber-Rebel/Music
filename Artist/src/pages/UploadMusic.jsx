@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, Music, Image as ImageIcon, X, AlertCircle, CheckCircle } from 'lucide-react';
+import { Upload, Music, Image as ImageIcon, X, AlertCircle, CheckCircle, Zap, Loader, Cpu } from 'lucide-react';
 import Card from '../components/Card';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import axios from 'axios';
+
+const MOOD_OPTIONS = ['happy', 'sad', 'angry', 'fearful', 'disgusted', 'surprised', 'neutral'];
 
 const UploadMusic = () => {
   const [dragActive, setDragActive] = useState(false);
@@ -20,6 +22,11 @@ const UploadMusic = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState(null);
   const [statusMessage, setStatusMessage] = useState('');
+  const [moodDetecting, setMoodDetecting] = useState(false);
+  const [detectedMood, setDetectedMood] = useState(null);
+  const [uploadStage, setUploadStage] = useState(null); // 'mood-detecting', 'uploading', 'complete'
+  const [moodSelectionMode, setMoodSelectionMode] = useState('manual'); // 'manual' or 'ai'
+  const [selectedMood, setSelectedMood] = useState(null);
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -75,9 +82,24 @@ const UploadMusic = () => {
     setStatusMessage('');
   };
 
+  // Get mood color and emoji
+  const getMoodStyle = (mood) => {
+    const moodColors = {
+      'happy': { bg: 'from-yellow-400 to-orange-400', text: 'text-yellow-100', emoji: '😊' },
+      'sad': { bg: 'from-blue-500 to-indigo-600', text: 'text-blue-100', emoji: '😢' },
+      'angry': { bg: 'from-red-500 to-red-700', text: 'text-red-100', emoji: '😠' },
+      'fearful': { bg: 'from-purple-600 to-purple-800', text: 'text-purple-100', emoji: '😨' },
+      'disgusted': { bg: 'from-green-600 to-emerald-700', text: 'text-green-100', emoji: '🤢' },
+      'surprised': { bg: 'from-pink-400 to-rose-500', text: 'text-pink-100', emoji: '😮' },
+      'neutral': { bg: 'from-gray-500 to-gray-700', text: 'text-gray-100', emoji: '😐' }
+    };
+    return moodColors[mood?.toLowerCase()] || moodColors['neutral'];
+  };
+
   const validateForm = () => {
     if (!file) return 'Please upload an audio file';
     if (!formData.title.trim()) return 'Title is required';
+    if (moodSelectionMode === 'manual' && !selectedMood) return 'Please select a mood';
     return null;
   };
 
@@ -89,31 +111,85 @@ const UploadMusic = () => {
 
     setIsUploading(true);
     setUploadProgress(0);
+    setDetectedMood(null);
     clearError();
 
     const data = new FormData();
     data.append('title', formData.title);
     data.append('music', file);
+    data.append('moodMode', moodSelectionMode); // 'manual' or 'ai'
+    if (moodSelectionMode === 'manual') {
+      data.append('mood', selectedMood); // User selected mood
+    }
     if (coverImage) data.append('coverImage', coverImage);
 
     try {
-      const res = await axios.post(
-        "http://localhost:3001/api/music/upload",
-        data,
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "multipart/form-data" },
-          onUploadProgress: (progressEvent) => {
-            const percent = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-            setUploadProgress(percent);
+      if (moodSelectionMode === 'ai') {
+        setUploadStage('mood-detecting');
+        setMoodDetecting(true);
+
+        // Simulate mood detection progress
+        let moodProgress = 0;
+        const moodInterval = setInterval(() => {
+          moodProgress += Math.random() * 40;
+          if (moodProgress > 85) moodProgress = 85;
+          setUploadProgress(Math.floor(moodProgress));
+        }, 300);
+
+        const res = await axios.post(
+          "http://localhost:3001/api/music/upload",
+          data,
+          {
+            withCredentials: true,
+            headers: { "Content-Type": "multipart/form-data" },
+            onUploadProgress: (progressEvent) => {
+              clearInterval(moodInterval);
+              setUploadStage('uploading');
+              setMoodDetecting(false);
+              // Mood detection complete, start file upload from 40%
+              const percent = 40 + Math.round((progressEvent.loaded / progressEvent.total) * 60);
+              setUploadProgress(percent);
+            }
           }
-        }
-      );
+        );
 
-      setUploadStatus('success');
-      setStatusMessage("Music uploaded successfully!");
+        // Extract mood from response
+        const mood = res.data.music.mood;
+        setDetectedMood(mood);
+        setUploadProgress(100);
+        setUploadStage('complete');
 
-      console.log("Uploaded:", res.data);
+        setUploadStatus('success');
+        setStatusMessage(`Music uploaded successfully! Detected mood: ${mood?.toUpperCase()}`);
+
+        console.log("Uploaded:", res.data);
+      } else {
+        // Manual mood selection - direct upload without AI detection
+        setUploadStage('uploading');
+        setUploadProgress(20);
+
+        const res = await axios.post(
+          "http://localhost:3001/api/music/upload",
+          data,
+          {
+            withCredentials: true,
+            headers: { "Content-Type": "multipart/form-data" },
+            onUploadProgress: (progressEvent) => {
+              const percent = 20 + Math.round((progressEvent.loaded / progressEvent.total) * 80);
+              setUploadProgress(percent);
+            }
+          }
+        );
+
+        setDetectedMood(selectedMood);
+        setUploadProgress(100);
+        setUploadStage('complete');
+
+        setUploadStatus('success');
+        setStatusMessage(`Music uploaded successfully! Mood: ${selectedMood?.toUpperCase()}`);
+
+        console.log("Uploaded:", res.data);
+      }
 
       setTimeout(() => {
         setFile(null);
@@ -125,13 +201,19 @@ const UploadMusic = () => {
           description: ''
         });
         setUploadProgress(0);
+        setDetectedMood(null);
+        setUploadStage(null);
+        setSelectedMood(null);
+        setMoodSelectionMode('manual');
         clearError();
-      }, 2500);
+      }, 3000);
 
     } catch (err) {
       console.error("Upload Error:", err);
       setErrorState(err.response?.data?.message || "Upload failed");
       setUploadProgress(0);
+      setUploadStage(null);
+      setMoodDetecting(false);
     } finally {
       setIsUploading(false);
     }
@@ -143,7 +225,71 @@ const UploadMusic = () => {
       <h1 className="text-3xl font-bold text-white mb-2">Upload Music</h1>
       <p className="text-gray-400 mb-6">Share your music with the world</p>
 
-      {uploadStatus && (
+      {/* UPLOAD PROGRESS & MOOD DETECTION UI */}
+      {isUploading && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 p-6 bg-gradient-to-r from-gray-900 to-gray-800 rounded-xl border border-gray-700"
+        >
+          {/* Stage Indicator */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              {moodDetecting ? (
+                <>
+                  <Loader className="text-purple-400 animate-spin" size={24} />
+                  <div>
+                    <p className="text-white font-semibold">AI Mood Detection</p>
+                    <p className="text-gray-400 text-sm">Analyzing audio characteristics...</p>
+                  </div>
+                </>
+              ) : uploadStage === 'uploading' ? (
+                <>
+                  <Upload className="text-green-400" size={24} />
+                  <div>
+                    <p className="text-white font-semibold">Uploading Music</p>
+                    <p className="text-gray-400 text-sm">Storing your file...</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="text-green-400" size={24} />
+                  <div>
+                    <p className="text-white font-semibold">Complete!</p>
+                    <p className="text-gray-400 text-sm">Your music is ready</p>
+                  </div>
+                </>
+              )}
+            </div>
+            <span className="text-2xl font-bold text-white">{uploadProgress}%</span>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="h-2 bg-gray-700 rounded-full overflow-hidden mb-6">
+            <motion.div
+              className="h-full bg-gradient-to-r from-purple-500 via-green-500 to-blue-500"
+              initial={{ width: 0 }}
+              animate={{ width: `${uploadProgress}%` }}
+              transition={{ duration: 0.3 }}
+            ></motion.div>
+          </div>
+
+          {/* Detected Mood Display */}
+          {detectedMood && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className={`bg-gradient-to-br ${getMoodStyle(detectedMood).bg} p-6 rounded-lg text-center`}
+            >
+              <div className="text-6xl mb-3">{getMoodStyle(detectedMood).emoji}</div>
+              <p className={`text-sm font-semibold mb-1 ${getMoodStyle(detectedMood).text}`}>DETECTED MOOD</p>
+              <p className={`text-2xl font-bold ${getMoodStyle(detectedMood).text}`}>{detectedMood?.toUpperCase()}</p>
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+
+      {uploadStatus && !isUploading && (
         <div className={`p-4 rounded-lg mb-4 flex gap-3 ${uploadStatus === "success"
           ? "bg-green-500/10 border border-green-500/20"
           : "bg-red-500/10 border border-red-500/20"}`}>
@@ -153,19 +299,6 @@ const UploadMusic = () => {
           <span className={uploadStatus === "success" ? "text-green-400" : "text-red-400"}>
             {statusMessage}
           </span>
-        </div>
-      )}
-
-      {/* Upload Progress Bar */}
-      {isUploading && (
-        <div className="mb-4">
-          <div className="flex justify-between text-sm text-gray-300">
-            <span>Uploading...</span>
-            <span>{uploadProgress}%</span>
-          </div>
-          <div className="h-2 bg-gray-700 rounded-full mt-2">
-            <div className="h-full bg-green-500 rounded-full" style={{ width: `${uploadProgress}%` }}></div>
-          </div>
         </div>
       )}
 
@@ -198,7 +331,7 @@ const UploadMusic = () => {
             <Input label="Track Title" name="title" placeholder="Enter track title"
               value={formData.title} onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
-              } />
+              } disabled={isUploading} />
 
             {/* AUDIO UPLOAD */}
             <div>
@@ -213,7 +346,7 @@ const UploadMusic = () => {
 
                 {!file ? (
                   <>
-                    <input type="file" accept="audio/*" className="hidden" id="audioUpload" onChange={handleChange} />
+                    <input type="file" accept="audio/*" className="hidden" id="audioUpload" onChange={handleChange} disabled={isUploading} />
                     <label htmlFor="audioUpload" className="cursor-pointer text-center text-gray-300">
                       <Upload size={30} className="mx-auto mb-2" />
                       <p>Drag & drop or click to upload</p>
@@ -237,8 +370,102 @@ const UploadMusic = () => {
               </div>
             </div>
 
+            {/* MOOD SELECTION - Two Options */}
+            <div className="space-y-4">
+              <label className="text-gray-400 text-sm block">Mood Selection</label>
+              
+              {/* Mode Toggle Buttons */}
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMoodSelectionMode('manual');
+                    setDetectedMood(null);
+                  }}
+                  disabled={isUploading}
+                  className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
+                    moodSelectionMode === 'manual'
+                      ? 'bg-green-500/20 border-2 border-green-500 text-green-400'
+                      : 'bg-gray-700 border-2 border-gray-600 text-gray-300 hover:border-gray-500'
+                  } disabled:opacity-50`}
+                >
+                  Manual Selection
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMoodSelectionMode('ai');
+                    setSelectedMood(null);
+                  }}
+                  disabled={isUploading}
+                  className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
+                    moodSelectionMode === 'ai'
+                      ? 'bg-purple-500/20 border-2 border-purple-500 text-purple-400'
+                      : 'bg-gray-700 border-2 border-gray-600 text-gray-300 hover:border-gray-500'
+                  } disabled:opacity-50`}
+                >
+                  <Cpu size={18} />
+                  AI Detection
+                </button>
+              </div>
+
+              {/* Manual Mood Selection Dropdown */}
+              {moodSelectionMode === 'manual' && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <select
+                    value={selectedMood || ''}
+                    onChange={(e) => setSelectedMood(e.target.value)}
+                    disabled={isUploading}
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-green-500 focus:outline-none transition disabled:opacity-50"
+                  >
+                    <option value="">Select a mood...</option>
+                    {MOOD_OPTIONS.map(mood => (
+                      <option key={mood} value={mood}>
+                        {mood.charAt(0).toUpperCase() + mood.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Selected Mood Preview */}
+                  {selectedMood && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className={`bg-gradient-to-br ${getMoodStyle(selectedMood).bg} p-4 rounded-lg text-center mt-3`}
+                    >
+                      <div className="text-4xl mb-2">{getMoodStyle(selectedMood).emoji}</div>
+                      <p className={`text-sm font-semibold ${getMoodStyle(selectedMood).text}`}>
+                        {selectedMood?.toUpperCase()}
+                      </p>
+                    </motion.div>
+                  )}
+                </motion.div>
+              )}
+
+              {/* AI Detection Info */}
+              {moodSelectionMode === 'ai' && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-purple-500/10 border border-purple-500/30 p-4 rounded-lg"
+                >
+                  <p className="text-sm text-purple-300 flex items-start gap-2">
+                    <Cpu size={16} className="mt-0.5 flex-shrink-0" />
+                    <span>AI will automatically detect mood when you upload. This may take a few seconds.</span>
+                  </p>
+                </motion.div>
+              )}
+            </div>
+
             <div className="flex justify-end">
-              <Button type="submit" variant="primary" disabled={isUploading || !file || !formData.title.trim()}>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={isUploading || !file || !formData.title.trim() || (moodSelectionMode === 'manual' && !selectedMood)}
+              >
                 {isUploading ? "Uploading..." : "Upload Track"}
               </Button>
             </div>

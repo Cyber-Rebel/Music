@@ -1,0 +1,62 @@
+import axios from 'axios';
+import {
+  fetchArtistTracksStart,
+  fetchArtistTracksSuccess,
+  fetchArtistTracksFailure,
+  createPlaylistStart,
+  createPlaylistSuccess,
+  createPlaylistFailure,
+} from '../slices/musicslice.jsx';
+
+const API_BASE_URL = 'http://localhost:3001/api/music';
+
+// Fetch artist tracks
+export const fetchArtistTracks = () => async (dispatch) => {
+  dispatch(fetchArtistTracksStart());
+  try {
+    const res = await axios.get(`${API_BASE_URL}/artist-music`, {
+      withCredentials: true,
+    });
+    dispatch(fetchArtistTracksSuccess(res.data.musics || []));
+  } catch (error) {
+    dispatch(
+      fetchArtistTracksFailure(
+        error.response?.data?.message || 'Error fetching artist music'
+      )
+    );
+  }
+};
+
+// Create playlist with cover image
+export const createPlaylist = (playlistData) => async (dispatch) => {
+  dispatch(createPlaylistStart());
+  try {
+    const formData = new FormData();
+    formData.append('title', playlistData.title);
+    
+    // Append each music ID to the form data
+    playlistData.musics.forEach((musicId) => {
+      formData.append('musics', musicId);
+    });
+
+    // Append cover image if provided
+    if (playlistData.coverImage) {
+      formData.append('coverImage', playlistData.coverImage);
+    }
+
+    const res = await axios.post(`${API_BASE_URL}/playlist`, formData, {
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    dispatch(createPlaylistSuccess(res.data.playlist));
+    return { success: true, data: res.data };
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message || 'Error creating playlist';
+    dispatch(createPlaylistFailure(errorMessage));
+    return { success: false, error: errorMessage };
+  }
+};

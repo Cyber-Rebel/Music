@@ -1,8 +1,9 @@
 const musicModel = require('../model/music.model.js');
 const playlistModel = require('../model/playlist.model.js');
-const {uploadMusicAndCover} = require('../services/storge.service.js')
+const {uploadMusicAndCover,playlistCoverUpload} = require('../services/storge.service.js')
 const LikeSong = require('../model/likesong.model.js');
 const UserPlaylist = require('../model/userplaylist.model.js');
+const {geminisongmooddetection} = require('../services/ai.serviecs.js')
 
 const uploadMusic = async(req,res)=>{
 // console.log(req)
@@ -11,7 +12,7 @@ const coverImageFile = req.files['coverImage'][0];
 const musicFile = req.files['music'][0];
 
 try{
-
+    console.log('moodDetect',req.moodDetectionResult);
     const uploadResult = await uploadMusicAndCover(musicFile, coverImageFile);
     // console.log('Upload Result:', uploadResult);
 
@@ -20,7 +21,8 @@ try{
         artist:req.user.fullName.firstName + " " + req.user.fullName.lastName,
         artistId:req.user.id,
          musicUrl:uploadResult.audio.url,
-         coverUrl:uploadResult.coverImage.url
+         coverUrl:uploadResult.coverImage.url,
+         mood: req.moodDetectionResult
         
         
     })
@@ -49,12 +51,17 @@ const getArtistMusic = async(req,res)=>{
 const createPlaylist  = async(req,res)=>{
     const {title,musics} = req.body;
     const user= req.user
+    const coverImageFile = req.file;
     try{
+        const uploadResult = await playlistCoverUpload(coverImageFile);
+
         const playlist = await playlistModel.create({
             title:title,
             artist:user.fullName.firstName+" "+user.fullName.lastName,
             artistId:user.id,
-            musics:musics
+            musics:musics,
+            coverUrl: uploadResult.url
+
         })
         return res.status(201).json({
             message:"Playlist created Successfull",
@@ -130,6 +137,7 @@ const getMusicById= async(req,res)=>{
  const getAllPlaylists = async(req,res)=>{
     try{
         const playlists = await playlistModel.find().lean().select('-artistId').select('_id');
+        console.log(playlists)
         return res.status(200).json({message:"All Playlists fetched successfully", playlists:playlists})
 
     }catch(error){
@@ -245,7 +253,28 @@ try {
 }
 
 
-module.exports = {uploadMusic,getArtistMusic,createPlaylist,getPlaylists,getAllMusic,getPlaylistById,getMusicById,getAllPlaylists,createUserPlaylist,getUserPlaylists,getSpecificUserPlaylists,getMusicByMood,getAllLikedSongs,likeSong, searchMusic};
+
+const musicMoodDectect = async (req, res) => {
+    const musicFile = req.file;
+    console.log('file mood ',req.moodDetectionResult);
+    console.log("Received music file for mood detection:", musicFile);
+    try {
+        const base64Music = musicFile.buffer.toString('base64');
+        const response = await geminisongmooddetection(base64Music);
+
+
+        res.status(200).json({ message: "Mood detected successfully", mood: response });
+
+    } catch (error) {
+        console.log("Error in mood detection", error);
+        res.status(500).json({ message: "Internal server error", error });
+    }
+};
+
+
+
+
+module.exports = {uploadMusic,getArtistMusic,createPlaylist,getPlaylists,getAllMusic,getPlaylistById,getMusicById,getAllPlaylists,createUserPlaylist,getUserPlaylists,getSpecificUserPlaylists,getMusicByMood,getAllLikedSongs,likeSong, searchMusic, musicMoodDectect};
 // Query look title?value=hello worls  to search song with title hello worls
 // page?key1=value1&key2=value2
 // params -: id
