@@ -150,8 +150,59 @@ const login = async(req,res)=>{
     }
 }
 
+const logout = async (req, res) => {
+try {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(400).json({ message: 'No token found' });
+  }
+
+  // Clear the cookie by setting its expiration date to a past date
+  res.cookie('token', '', { expires: new Date(0), httpOnly: true });
+
+  return res.status(200).json({ message: 'User logged out successfully' });
+
+}catch (error) { 
+  console.log('Error during user logout:', error);
+  return res.status(500).json({message:'Internal server error'});
+ }
+
+
+
+
+
+}
+
+const getUserProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await UserModel.findById(userId).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    return res.status(200).json({ user });
+  } catch (error) {
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+
+
+}
+const getArtistProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await UserModel.findById(userId).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'Artist not found' });
+    }
+    return res.status(200).json({ user });
+  } catch (error) {
+    return res.status(500).json({ message: 'Internal server error' });
+  }   
+}
 module.exports = {
     register,
     GoogleAuthCallback,
-    login
+    login,
+    logout,getUserProfile,getArtistProfile
+
 };
