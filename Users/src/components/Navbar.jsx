@@ -28,8 +28,15 @@ const Navbar = ({ onMenuClick }) => {
   const [hasNewNotification, setHasNewNotification] = useState(false);
   
   // Get user from Redux store
-  const { user, isAuthenticated } = useSelector((state) => state.user);
-
+  const { email, fullName, isAuthenticated } = useSelector((state) => state.user);
+  
+  // Debug log - safely access nested properties
+  console.log('User data:', { 
+    email, 
+    firstName: fullName?.firstName, 
+    lastName: fullName?.lastName,
+    isAuthenticated 
+  });
   // Search music function
   const searchMusic = async (query) => {
     if (!query.trim()) {
@@ -152,24 +159,22 @@ const Navbar = ({ onMenuClick }) => {
   }, []);
 
   const handleLogout = async () => {
-    localStorage.removeItem('user');
     await dispatch(logoutUser());
     setIsSettingsOpen(false);
-    
     navigate('/login');
   };
 
   // Get user display info
   const getUserName = () => {
-    if (user?.fullName) {
-      return `${user.fullName.firstName} ${user.fullName.lastName}`;
+    if (fullName?.firstName && fullName?.lastName) {
+      return `${fullName.firstName} ${fullName.lastName}`;
     }
     return 'Guest';
   };
 
   const getUserInitials = () => {
-    if (user?.fullName) {
-      return `${user.fullName.firstName?.charAt(0) || ''}${user.fullName.lastName?.charAt(0) || ''}`.toUpperCase();
+    if (fullName?.firstName && fullName?.lastName) {
+      return `${fullName.firstName.charAt(0)}${fullName.lastName.charAt(0)}`.toUpperCase();
     }
     return 'G';
   };
@@ -367,9 +372,9 @@ const Navbar = ({ onMenuClick }) => {
               />
               <div>
                 <h4 className="text-white font-semibold text-lg">{getUserName()}</h4>
-                <p className="text-[#b3b3b3] text-sm">{user?.email || 'No email'}</p>
+                <p className="text-[#b3b3b3] text-sm">{email || 'No email'}</p>
                 <span className="inline-block mt-1 px-2 py-0.5 bg-[#1db954]/20 text-[#1db954] text-xs rounded-full">
-                  {user?.role === 'artist' ? 'Artist' : 'Premium'}
+                  Premium User
                 </span>
               </div>
             </div>
@@ -587,7 +592,7 @@ const Navbar = ({ onMenuClick }) => {
             <div className="hidden sm:flex items-center gap-2">
               <div className="flex flex-col">
                 <span className="text-white font-semibold text-xs lg:text-sm max-w-[120px] truncate leading-tight">{getUserName()}</span>
-                <span className="text-[#b3b3b3] text-[10px] lg:text-xs leading-tight">{user?.role === 'artist' ? 'Artist' : 'Premium'}</span>
+                <span className="text-[#b3b3b3] text-[10px] lg:text-xs leading-tight">Premium</span>
               </div>
               <FaChevronDown className="text-[#b3b3b3] text-xs" />
             </div>

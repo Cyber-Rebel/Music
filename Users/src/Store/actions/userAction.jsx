@@ -15,11 +15,9 @@ export const loginUser = (credentials) => async (dispatch) => {
       withCredentials: true,
     });
     
+    // Backend returns: { message, user: { id, email, fullName: { firstName, lastName }, role } }
     const userData = response.data.user;
     dispatch(setUser(userData));
-    
-    // Store user in localStorage for persistence
-    localStorage.setItem('user', JSON.stringify(userData));
     
     return { success: true, user: userData };
   } catch (error) {
@@ -49,11 +47,9 @@ export const registerUser = (userData) => async (dispatch) => {
       headers: { 'Content-Type': 'application/json' },
     });
     
+    // Backend returns: { message, user: { id, email, fullName: { firstName, lastName }, role } }
     const user = response.data.user;
     dispatch(setUser(user));
-    
-    // Store user in localStorage for persistence
-    localStorage.setItem('user', JSON.stringify(user));
     
     return { success: true, user };
   } catch (error) {
@@ -68,34 +64,47 @@ export const googleAuth = () => {
   window.location.href = `${API_URL}/google`;
 };
 
-// Check if user is already logged in (from localStorage or cookie)
-export const checkAuthStatus = () => async (dispatch) => {
-  try {
-    // Check localStorage first
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      dispatch(setUser(JSON.parse(storedUser)));
-      return { success: true };
-    }
-    
-    return { success: false };
-  } catch (error) {
-    dispatch(setError('Failed to check auth status'));
-    return { success: false };
-  }
-};
 
-// Logout action
+
+// Logout action - calls backend API to clear cookie
 export const logoutUser = () => async (dispatch) => {
   try {
-    // Clear localStorage
-    localStorage.removeItem('user');
+    // Call backend logout endpoint to clear token cookie
+    await axios.get(`${API_URL}/logout`, {
+      withCredentials: true,
+    });
     
+    // Clear Redux state
     dispatch(logout());
     
     return { success: true };
   } catch (error) {
     console.error('Logout error:', error);
+    // Clear Redux state even if API call fails
+    dispatch(logout());
     return { success: false };
+  }
+};
+
+
+// Fetch user profile from backend (uses JWT token from cookie)
+// Backend returns: { user: { id, email, fullName: { firstName, lastName }, role } }
+export const authenticateUser = () => async (dispatch) => {
+  try {
+    dispatch(setLoading(true));
+    
+    const response = await axios.get(`${API_URL}/user/me`, {
+      withCredentials: true,
+    });
+    
+    // Backend returns: { user: { id, email, fullName, role } }
+    const user = response.data.user;
+    dispatch(setUser(user));
+    
+    return { success: true, user };
+  } catch (error) {
+    console.error('Authentication error:', error);
+    dispatch(setError('Authentication failed'));
+    return { success: false, error: true, message: 'Authentication failed' };
   }
 };

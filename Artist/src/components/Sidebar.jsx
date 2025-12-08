@@ -9,6 +9,8 @@
       { path: '/', label: 'Dashboard', icon: LayoutDashboard },
       { path: '/upload', label: 'Upload Music', icon: Upload },
       { path: '/create-playlist', label: 'Playlists', icon: ListMusic },
+        { path: '/artist/me', label: 'Profile', icon: Music },
+        { path: '/artist/playlist', label: 'My Playlists', icon: ListMusic },
     ];
 
     return (
@@ -43,16 +45,16 @@
         </nav>
 
         <div className="p-4 border-t border-(--color-border-subtle)">
-          <button 
-            onClick={() => {
-              alert('Logout clicked! In a real app, this would log you out.');
-              // In real app: navigate('/login');
-            }}
-            className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-(--color-text-secondary) hover:text-red-400 hover:bg-(--color-card-hover) transition-all duration-200"
-          >
-            <LogOut size={20} />
-            <span className="font-medium">Logout</span>
-          </button>
+            <button 
+              onClick={() => {
+                // Dispatch logout action and redirect to login
+                if (window.logoutUser) window.logoutUser();
+              }}
+              className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-(--color-text-secondary) hover:text-red-400 hover:bg-(--color-card-hover) transition-all duration-200"
+            >
+              <LogOut size={20} />
+              <span className="font-medium">Logout</span>
+            </button>
         </div>
       </div>
     );

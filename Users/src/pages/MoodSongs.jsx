@@ -108,9 +108,7 @@ const MoodSongs = () => {
         setLoading(true);
         const token = localStorage.getItem('token');
         const response = await axios.get(`http://localhost:3001/api/music/mood-dector/${mood}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+        withCredentials: true,
         });
         
         if (response.data && response.data.length > 0) {

@@ -7,7 +7,7 @@ import { loginUser, googleAuth, clearError } from '../Store/actions/userAction';
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isAuthenticated, loading, error } = useSelector((state) => state.user);
+  const { id, loading, error } = useSelector((state) => state.user);
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -15,12 +15,7 @@ const Login = () => {
     password: ''
   });
 
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/');
-    }
-  }, [isAuthenticated, navigate]);
+
 
   // Clear error on unmount
   useEffect(() => {

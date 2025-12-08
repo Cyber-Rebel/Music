@@ -7,6 +7,10 @@ import Dashboard from './pages/Dashboard';
 import UploadMusic from './pages/UploadMusic';
 import CreatePlaylist from './pages/CreatePlaylist';
 
+import ArtistProfile from './pages/ArtistProfile';
+import ArtistPlaylists from './pages/ArtistPlaylists';
+import PlaylistDetails from './pages/PlaylistDetails';
+
 const App = () => {
   return (
     <Router>
@@ -34,6 +38,27 @@ const App = () => {
         <Route path="/create-playlist" element={
           <DashboardLayout>
             <CreatePlaylist />
+          </DashboardLayout>
+        } />
+
+        {/* Artist Profile Route (Protected) */}
+        <Route path="/artist/me" element={
+          <DashboardLayout>
+            <ArtistProfile />
+          </DashboardLayout>
+        } />
+
+        {/* Artist Playlists Route (Protected) */}
+        <Route path="/artist/playlist" element={
+          <DashboardLayout>
+            <ArtistPlaylists />
+          </DashboardLayout>
+        } />
+
+        {/* Playlist Details Route (Protected) */}
+        <Route path="/artist/playlist/:id" element={
+          <DashboardLayout>
+            <PlaylistDetails />
           </DashboardLayout>
         } />
         

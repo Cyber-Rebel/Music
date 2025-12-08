@@ -24,6 +24,29 @@ export const fetchArtistTracks = () => async (dispatch) => {
         error.response?.data?.message || 'Error fetching artist music'
       )
     );
+
+  }
+};
+
+// Fetch artist playlists
+export const fetchArtistPlaylists = () => async (dispatch) => {
+  dispatch(fetchArtistTracksStart()); // Reuse loading state
+  try {
+    const res = await axios.get('http://localhost:3001/api/music/artist/playlist', { withCredentials: true });
+    dispatch(fetchArtistTracksSuccess(res.data.playlists || []));
+  } catch (error) {
+    dispatch(fetchArtistTracksFailure(error.response?.data?.message || 'Error fetching playlists'));
+  }
+};
+
+// Fetch playlist details
+export const fetchPlaylistDetails = (id) => async (dispatch) => {
+  dispatch(fetchArtistTracksStart()); // Reuse loading state
+  try {
+    const res = await axios.get(`http://localhost:3001/api/music/artist/playlist/${id}`, { withCredentials: true });
+    dispatch({ type: 'music/setPlaylistDetails', payload: res.data.playlist });
+  } catch (error) {
+    dispatch(fetchArtistTracksFailure(error.response?.data?.message || 'Error fetching playlist details'));
   }
 };
 

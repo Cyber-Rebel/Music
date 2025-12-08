@@ -1,9 +1,12 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { FaHome, FaList, FaPlus, FaSignOutAlt, FaHeart, FaUsers, FaBroadcastTower, FaCrown } from 'react-icons/fa';
 import { MdLibraryMusic } from 'react-icons/md';
+import { useDispatch } from 'react-redux';
+import {logoutUser} from '../Store/actions/userAction';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const navItems = [
     { path: '/', label: 'Home', icon: <FaHome /> },
@@ -22,11 +25,9 @@ const Sidebar = ({ isOpen, onClose }) => {
   ];
 
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      // In real app: clear auth tokens, user data, etc.
-      alert('Logged out successfully! (Dummy action)');
+    dispatch(logoutUser()); 
       navigate('/login');
-    }
+    
   };
 
   return (

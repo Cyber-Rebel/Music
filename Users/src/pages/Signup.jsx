@@ -17,12 +17,7 @@ const Signup = () => {
     password: ''
   });
 
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/');
-    }
-  }, [isAuthenticated, navigate]);
+
 
   // Clear error on unmount
   useEffect(() => {

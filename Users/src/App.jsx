@@ -1,9 +1,6 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { MusicProvider } from './contexts/MusicContext';
 import MainLayout from './layouts/MainLayout';
-import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import SongDetails from './pages/SongDetails';
 import LikedSongs from './pages/LikedSongs';
@@ -19,25 +16,42 @@ import Search from './pages/Search';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import UserPlaylist from './pages/userPlaylist';
-import { checkAuthStatus } from './Store/actions/userAction';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+
+
+// ✔ ProtectedRoute Component Inside Same File
+const ProtectedRoute = ({ children }) => {
+  const [isAuth, setIsAuth] = useState(null);
+
+  useEffect(() => {
+    axios.get('http://localhost:3000/api/auth/user/me', {
+      withCredentials: true
+    })
+      .then(() => setIsAuth(true))
+      .catch(() => setIsAuth(false));
+  }, []);
+
+  if (isAuth === null) {
+    return <p>Checking Authentication...</p>;
+  }
+
+  return isAuth ? children : <Navigate to="/login" replace />;
+};
+
 
 const App = () => {
-  const dispatch = useDispatch();
-
-  // Check auth status on app load
-  useEffect(() => {
-    dispatch(checkAuthStatus());
-  }, [dispatch]);
-
   return (
     <MusicProvider>
       <Router>
         <Routes>
-          {/* Auth Routes - Without MainLayout */}
+
+          {/* Public Pages */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          
-          {/* Protected App Routes - With MainLayout */}
+
+
+          {/* Protected Pages (No LocalStorage Use) */}
           <Route path="/" element={
             <ProtectedRoute>
               <MainLayout />
@@ -48,7 +62,7 @@ const App = () => {
             <Route path="liked-songs" element={<LikedSongs />} />
             <Route path="artist-playlists" element={<ArtistPlaylists />} />
             <Route path="playlist/:id" element={<SinglePlaylist />} />
-            <Route path='user-playlist/:id' element={<UserPlaylist/>} />
+            <Route path='user-playlist/:id' element={<UserPlaylist />} />
             <Route path="create-playlist" element={<CreatePlaylist />} />
             <Route path="my-playlists" element={<MyPlaylists />} />
             <Route path="join-friends" element={<JoinFriends />} />
@@ -57,6 +71,7 @@ const App = () => {
             <Route path="mood-songs/:mood" element={<MoodSongs />} />
             <Route path="search" element={<Search />} />
           </Route>
+
         </Routes>
       </Router>
     </MusicProvider>

@@ -8,6 +8,7 @@ const initialState = {
   createPlaylistLoading: false,
   createPlaylistError: null,
   createPlaylistSuccess: false,
+  playlistDetails: null,
 };
 
 const musicSlice = createSlice({
@@ -48,6 +49,11 @@ const musicSlice = createSlice({
       state.createPlaylistError = null;
       state.createPlaylistSuccess = false;
     },
+    setPlaylistDetails: (state, action) => {
+      state.playlistDetails = action.payload;
+      state.loading = false;
+      state.error = null;
+    },
   },
 });
 
@@ -59,6 +65,7 @@ export const {
   createPlaylistSuccess,
   createPlaylistFailure,
   resetCreatePlaylistState,
+  setPlaylistDetails,
 } = musicSlice.actions;
 
 export default musicSlice.reducer;

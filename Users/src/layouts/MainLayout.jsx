@@ -1,14 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import MusicPlayer from '../components/MusicPlayer';
+import { connectSocket, disconnectSocket } from '../socket.service';
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const closeSidebar = () => setIsSidebarOpen(false);
+
+  // Connect socket when MainLayout mounts (user is in the app)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      connectSocket();
+    }, 1);
+    
+    return () => {
+      clearTimeout(timer);
+      disconnectSocket();
+    };
+  }, []);
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#121212]">

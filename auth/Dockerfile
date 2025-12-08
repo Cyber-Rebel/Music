@@ -10,9 +10,6 @@ RUN npm install --production --silent
 # Copy app source
 COPY . .
 
-# Create non-root user and switch to it
-RUN addgroup -S app && adduser -S app -G app
-USER app
 
 # Default environment
 ENV NODE_ENV=production

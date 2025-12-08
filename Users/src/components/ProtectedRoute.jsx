@@ -4,12 +4,12 @@ import { useSelector } from 'react-redux';
 import { connectSocket, disconnectSocket } from '../socket.service';
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useSelector((state) => state.user);
+  const { id, isAuthenticated, loading } = useSelector((state) => state.user);
   const location = useLocation();
 
   // Connect socket when user is authenticated
   useEffect(() => {
-    if (isAuthenticated && !loading) {
+    if (id && !loading) {
       // Small delay to ensure cookies are ready
       const timer = setTimeout(() => {
         connectSocket();
@@ -19,11 +19,11 @@ const ProtectedRoute = ({ children }) => {
     
     // Disconnect when user logs out
     return () => {
-      if (!isAuthenticated) {
+      if (!id) {
         disconnectSocket();
       }
     };
-  }, [isAuthenticated, loading]);
+  }, [id, loading]);
 
   // Show loading state while checking auth
   if (loading) {
@@ -38,7 +38,7 @@ const ProtectedRoute = ({ children }) => {
   }
 
   // If not authenticated, redirect to login
-  if (!isAuthenticated) {
+  if (!id || !isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

@@ -4,7 +4,7 @@ const socketInstance = io('http://localhost:3001', {
     withCredentials: true,
     autoConnect: false, // Don't connect automatically
     reconnection: true,
-    reconnectionAttempts: 5,
+    reconnectionAttempts: 10,
     reconnectionDelay: 1000,
     transports: ['websocket', 'polling'], // Try websocket first, fallback to polling
 });
