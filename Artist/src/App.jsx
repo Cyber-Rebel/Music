@@ -1,65 +1,88 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import DashboardLayout from './layouts/DashboardLayout';
+import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import UploadMusic from './pages/UploadMusic';
 import CreatePlaylist from './pages/CreatePlaylist';
-
 import ArtistProfile from './pages/ArtistProfile';
 import ArtistPlaylists from './pages/ArtistPlaylists';
 import PlaylistDetails from './pages/PlaylistDetails';
 
 const App = () => {
+  const { isAuthenticated } = useSelector((state) => state.user);
+
   return (
     <Router>
       <Routes>
-        {/* Public Routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        {/* Public Routes - Redirect to dashboard if already authenticated */}
+        <Route 
+          path="/login" 
+          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} 
+        />
+        <Route 
+          path="/signup" 
+          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Signup />} 
+        />
         
-        {/* Dashboard Routes */}
+        {/* Protected Dashboard Routes */}
         <Route path="/" element={
-          <DashboardLayout>
-            <Dashboard />
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Dashboard />
+            </DashboardLayout>
+          </ProtectedRoute>
         } />
         <Route path="/dashboard" element={
-          <DashboardLayout>
-            <Dashboard />
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Dashboard />
+            </DashboardLayout>
+          </ProtectedRoute>
         } />
         <Route path="/upload" element={
-          <DashboardLayout>
-            <UploadMusic />
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout>
+              <UploadMusic />
+            </DashboardLayout>
+          </ProtectedRoute>
         } />
         <Route path="/create-playlist" element={
-          <DashboardLayout>
-            <CreatePlaylist />
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout>
+              <CreatePlaylist />
+            </DashboardLayout>
+          </ProtectedRoute>
         } />
 
         {/* Artist Profile Route (Protected) */}
         <Route path="/artist/me" element={
-          <DashboardLayout>
-            <ArtistProfile />
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ArtistProfile />
+            </DashboardLayout>
+          </ProtectedRoute>
         } />
 
         {/* Artist Playlists Route (Protected) */}
         <Route path="/artist/playlist" element={
-          <DashboardLayout>
-            <ArtistPlaylists />
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ArtistPlaylists />
+            </DashboardLayout>
+          </ProtectedRoute>
         } />
 
         {/* Playlist Details Route (Protected) */}
         <Route path="/artist/playlist/:id" element={
-          <DashboardLayout>
-            <PlaylistDetails />
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout>
+              <PlaylistDetails />
+            </DashboardLayout>
+          </ProtectedRoute>
         } />
         
         {/* Catch all - redirect to dashboard */}

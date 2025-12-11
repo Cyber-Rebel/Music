@@ -1,12 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User, AlertCircle } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import Card from '../components/Card';
+import { signupArtist } from '../store/actions/useraction';
+import { clearError } from '../store/slices/userSlice';
 
 const Signup = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, error: reduxError, isAuthenticated } = useSelector((state) => state.user);
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -15,9 +22,19 @@ const Signup = () => {
     confirmPassword: ''
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const [localError, setLocalError] = useState('');
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Clear errors on mount
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -36,51 +53,28 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return;
+    if (loading) return;
 
     const validationError = validateForm();
     if (validationError) {
-      setError(validationError);
+      setLocalError(validationError);
       return;
     }
 
-    setIsSubmitting(true);
-    setError('');
+    setLocalError('');
+    dispatch(clearError());
 
     const payload = {
       email: formData.email,
       password: formData.password,
-      role: "artist",               // you can change if needed
+      role: "artist",
       fullName: {
         firstName: formData.firstName,
         lastName: formData.lastName
       }
     };
 
-    try {
-      const res = await fetch("http://localhost:3000/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Registration failed");
-        setIsSubmitting(false);
-        return;
-      }
-
-      navigate("/login");
-
-    } catch (err) {
-      setError("Something went wrong");
-      console.log("Signup Error:", err);
-    }
-
-    setIsSubmitting(false);
+    await dispatch(signupArtist(payload));
   };
 
   const handleGoogleSignup = () => {
@@ -103,14 +97,14 @@ const Signup = () => {
             <h1 className="text-3xl font-bold mb-2">Create Artist Account</h1>
           </div>
 
-          {error && (
+          {(localError || reduxError) && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-3"
             >
               <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
-              <span className="text-red-400 text-sm">{error}</span>
+              <span className="text-red-400 text-sm">{localError || reduxError}</span>
             </motion.div>
           )}
 
@@ -124,7 +118,7 @@ const Signup = () => {
               onChange={handleChange}
               icon={User}
               required
-              disabled={isSubmitting}
+              disabled={loading}
             />
 
             <Input
@@ -135,7 +129,7 @@ const Signup = () => {
               onChange={handleChange}
               icon={User}
               required
-              disabled={isSubmitting}
+              disabled={loading}
             />
 
             <Input
@@ -147,7 +141,7 @@ const Signup = () => {
               onChange={handleChange}
               icon={Mail}
               required
-              disabled={isSubmitting}
+              disabled={loading}
             />
 
             <Input
@@ -159,7 +153,7 @@ const Signup = () => {
               onChange={handleChange}
               icon={Lock}
               required
-              disabled={isSubmitting}
+              disabled={loading}
             />
 
             <Input
@@ -171,16 +165,16 @@ const Signup = () => {
               onChange={handleChange}
               icon={Lock}
               required
-              disabled={isSubmitting}
+              disabled={loading}
             />
 
             <Button
               type="submit"
               variant="primary"
               className="w-full mt-4"
-              disabled={isSubmitting}
+              disabled={loading}
             >
-              {isSubmitting ? 'Creating Account...' : 'Sign Up'}
+              {loading ? 'Creating Account...' : 'Sign Up'}
             </Button>
           </form>
 
@@ -194,7 +188,7 @@ const Signup = () => {
             variant="google"
             className="w-full flex items-center justify-center gap-3"
             onClick={handleGoogleSignup}
-            disabled={isSubmitting}
+            disabled={loading}
           >
             <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
             Sign up with Google

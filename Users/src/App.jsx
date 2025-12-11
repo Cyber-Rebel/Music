@@ -18,11 +18,14 @@ import Signup from './pages/Signup';
 import UserPlaylist from './pages/userPlaylist';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { authenticateUser } from './Store/actions/userAction.jsx';                   
 
 
 // ✔ ProtectedRoute Component Inside Same File
 const ProtectedRoute = ({ children }) => {
   const [isAuth, setIsAuth] = useState(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     axios.get('http://localhost:3000/api/auth/user/me', {
@@ -30,7 +33,12 @@ const ProtectedRoute = ({ children }) => {
     })
       .then(() => setIsAuth(true))
       .catch(() => setIsAuth(false));
-  }, []);
+
+
+
+        dispatch(authenticateUser())
+        
+  }, [dispatch]);
 
   if (isAuth === null) {
     return <p>Checking Authentication...</p>;

@@ -107,10 +107,10 @@ const MoodSongs = () => {
       try {
         setLoading(true);
         const token = localStorage.getItem('token');
-        const response = await axios.get(`http://localhost:3001/api/music/mood-dector/${mood}`, {
+        const response = await axios.get(`http://localhost:3001/api/music/mood-dectect/?mood=${mood}&limit=${10}`, {
         withCredentials: true,
         });
-        
+        console.log('Mood Songs Response:', response.data);
         if (response.data && response.data.length > 0) {
           setSongs(response.data);
         } else {

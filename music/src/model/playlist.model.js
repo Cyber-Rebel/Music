@@ -15,7 +15,7 @@ const playlistSchema = new mongoose.Schema({
     musics: [{
         type: mongoose.Schema.Types.ObjectId,
         // new  working routes 
-        // ref: 'music'    
+        ref: 'music'    
     }],
     coverUrl: {
         type: String,

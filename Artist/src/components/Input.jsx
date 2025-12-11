@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Input = ({ label, type = 'text', placeholder, value, onChange, name, icon: Icon, ...props }) => {
+const Input = React.forwardRef(({ label, type = 'text', placeholder, value, onChange, name, icon: Icon, ...props }, ref) => {
   return (
     <div className="flex flex-col gap-2 w-full">
       {label && <label className="text-sm font-medium text-(--color-text-secondary)">{label}</label>}
@@ -11,6 +11,7 @@ const Input = ({ label, type = 'text', placeholder, value, onChange, name, icon:
           </div>
         )}
         <input
+          ref={ref}
           type={type}
           name={name}
           value={value}
@@ -22,6 +23,8 @@ const Input = ({ label, type = 'text', placeholder, value, onChange, name, icon:
       </div>
     </div>
   );
-};
+});
+
+Input.displayName = 'Input';
 
 export default Input;

@@ -167,7 +167,7 @@ const Navbar = ({ onMenuClick }) => {
   // Get user display info
   const getUserName = () => {
     if (fullName?.firstName && fullName?.lastName) {
-      return `${fullName.firstName} ${fullName.lastName}`;
+      return `${fullName?.firstName} ${fullName?.lastName}`;
     }
     return 'Guest';
   };

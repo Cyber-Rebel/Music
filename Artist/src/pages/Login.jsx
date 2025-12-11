@@ -1,17 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, AlertCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Input from '../components/Input';
 import Button from '../components/Button';
 import Card from '../components/Card';
+import { loginArtist } from '../store/actions/useraction';
+import { clearError } from '../store/slices/userSlice';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [serverError, setServerError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const { loading, error, isAuthenticated } = useSelector((state) => state.user);
 
   const {
     register,
@@ -19,28 +22,27 @@ const Login = () => {
     formState: { errors },
   } = useForm();
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Clear errors on mount
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
+
   // ---------------------------
   // Handle Form Submit
   // ---------------------------
   const onSubmit = async (data) => {
-    setLoading(true);
-    setServerError('');
-
-    try {
-      // Dummy validation - in real app this would be API call
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
-      
-      if (data.email === 'artist@example.com' && data.password === 'password') {
-        alert('Login successful! Redirecting to dashboard...');
-        navigate('/dashboard');
-      } else {
-        setServerError('Invalid email or password. Try artist@example.com / password');
-      }
-    } catch (err) {
-      setServerError('Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    dispatch(clearError());
+    await dispatch(loginArtist({
+      email: data.email,
+      password: data.password
+    }));
   };
 
   // ---------------------------
@@ -68,14 +70,14 @@ const Login = () => {
           </div>
 
           {/* Error display */}
-          {serverError && (
+          {error && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-3"
             >
               <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
-              <span className="text-red-400 text-sm">{serverError}</span>
+              <span className="text-red-400 text-sm">{error}</span>
             </motion.div>
           )}
 

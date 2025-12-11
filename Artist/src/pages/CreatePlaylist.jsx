@@ -11,7 +11,7 @@ import { resetCreatePlaylistState } from "../store/slices/musicslice";
 const CreatePlaylist = () => {
   const dispatch = useDispatch();
   const { artistTracks, loading, createPlaylistLoading, createPlaylistSuccess, createPlaylistError } = useSelector((state) => state.music);
-  
+  console.log("Artist Tracks:", artistTracks);
   const [title, setTitle] = useState("");
   const [selectedTracks, setSelectedTracks] = useState([]);
   const [coverImage, setCoverImage] = useState(null);
@@ -23,6 +23,7 @@ const CreatePlaylist = () => {
     dispatch(fetchArtistTracks());
   }, [dispatch]);
 
+  
   // Handle playlist creation success
   useEffect(() => {
     if (createPlaylistSuccess) {
@@ -189,7 +190,7 @@ const CreatePlaylist = () => {
 
                           <div className="flex items-center gap-3">
                             <img
-                              src={track.coverImage}
+                              src={track.coverUrl}
                               alt={track.title}
                               className="w-10 h-10 rounded object-cover"
                             />

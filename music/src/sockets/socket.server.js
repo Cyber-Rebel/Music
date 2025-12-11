@@ -127,13 +127,6 @@ console.log(isPlaying? "Playing" : "Paused", "audio for room:", roomId);
     })
 
 
-
-
-  
-
-
-
-
     socket.on("disconnect", () => {
         socket.leave(socket.user.id) // hamre resouce kam katam ho esliye 
         onlineUsers.delete(socket.user.email);

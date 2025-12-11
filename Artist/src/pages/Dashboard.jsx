@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { Play, TrendingUp, Users, Music } from 'lucide-react';
+import { Play, TrendingUp, ListMusic, Music } from 'lucide-react';
 import Card from '../components/Card';
 
 const StatCard = ({ title, value, icon: Icon, trend }) => (
@@ -24,16 +24,18 @@ const StatCard = ({ title, value, icon: Icon, trend }) => (
 const Dashboard = () => {
 
   // ----------------------------
-  // STATE FOR RECENT UPLOADS
+  // STATE FOR RECENT UPLOADS AND PLAYLISTS
   // ----------------------------
   const [recentUploads, setRecentUploads] = useState([]);
+  const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // ----------------------------
-  // FETCH ARTIST MUSIC
+  // FETCH ARTIST MUSIC AND PLAYLISTS
   // ----------------------------
   useEffect(() => {
     fetchArtistMusic();
+    fetchArtistPlaylists();
   }, []);
 
   const fetchArtistMusic = async () => {
@@ -41,7 +43,6 @@ const Dashboard = () => {
       const res = await axios.get("http://localhost:3001/api/music/artist-music", {
         withCredentials: true,
       });
-console.log(res.data.musics.length);
       setRecentUploads(res.data.musics);
     } catch (error) {
       console.error("Error fetching artist music:", error);
@@ -49,33 +50,43 @@ console.log(res.data.musics.length);
       setLoading(false);
     }
   };
-  console.log(recentUploads.length); 
+
+  const fetchArtistPlaylists = async () => {
+    try {
+      const res = await axios.get("http://localhost:3001/api/music/artist/playlist", {
+        withCredentials: true,
+      });
+      setPlaylists(res.data.playlists || []);
+    } catch (error) {
+      console.error("Error fetching artist playlists:", error);
+    }
+  }; 
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full space-y-8"
+      className="w-full space-y-6 sm:space-y-8"
     >
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Welcome back, John!</h1>
-        <p className="text-(--color-text-secondary)">Here's how your music is performing</p>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Welcome back, John!</h1>
+        <p className="text-(--color-text-secondary) text-sm sm:text-base">Here's how your music is performing</p>
       </div>
 
       {/* STAT CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <StatCard title="Total Plays" value={`${recentUploads.length}`} icon={Play} trend="+12% this week" />
-        <StatCard title="Followers" value="4,230" icon={Users} trend="+5% this week" />
-        <StatCard title="Total Tracks" value="24" icon={Music} trend="+2 new tracks" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <StatCard title="Total Tracks" value={`${recentUploads.length}`} icon={Music} trend={`${recentUploads.length} uploaded`} />
+        <StatCard title="Total Playlists" value={`${playlists.length}`} icon={ListMusic} trend={`${playlists.length} created`} />
+        <StatCard title="Total Plays" value="1,245" icon={Play} trend="+12% this week" />
       </div>
 
       {/* RECENT UPLOADS + ANALYTICS */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
 
         {/* RECENT UPLOADS */}
         <Card className="h-full">
-          <h2 className="text-xl font-bold text-white mb-6">Recent Uploads</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Recent Uploads</h2>
 
           {loading ? (
             <p className="text-(--color-text-secondary)">Loading...</p>
