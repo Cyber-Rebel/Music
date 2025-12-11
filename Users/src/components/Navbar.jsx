@@ -344,7 +344,10 @@ const Navbar = ({ onMenuClick }) => {
               </div>
 
               <button 
-                onClick={() => setCyberAIConnected(!cyberAIConnected)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCyberAIConnected(!cyberAIConnected);
+                }}
                 className={`w-full font-semibold py-3 px-6 rounded-lg transition-all ${
                   cyberAIConnected 
                     ? 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30' 
@@ -380,7 +383,10 @@ const Navbar = ({ onMenuClick }) => {
             </div>
             
             <button 
-              onClick={handleLogout}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleLogout();
+              }}
               className="w-full flex items-center justify-center gap-2 bg-red-500/10 text-red-400 border border-red-500/30 py-2.5 rounded-lg hover:bg-red-500/20 transition-colors"
             >
               <FaSignOutAlt />
@@ -402,12 +408,15 @@ const Navbar = ({ onMenuClick }) => {
         />
         
         {/* Settings Modal */}
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#121212] rounded-lg w-full max-w-6xl h-[90vh] flex overflow-hidden border border-[#282828]">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none">
+          <div 
+            className="bg-[#121212] rounded-lg w-full max-w-6xl max-h-[90vh] flex flex-col lg:flex-row overflow-hidden border border-[#282828] pointer-events-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Sidebar */}
-            <div className="w-72 bg-[#0a0a0a] border-r border-[#282828] p-6">
+            <div className="w-full lg:w-72 bg-[#0a0a0a] border-b lg:border-b-0 lg:border-r border-[#282828] p-4 lg:p-6 max-h-48 lg:max-h-none overflow-y-auto">
               {/* Header */}
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center justify-between mb-6 lg:mb-8">
                 <h2 className="text-white text-lg font-semibold">Settings</h2>
                 <button 
                   onClick={() => setIsSettingsOpen(false)}
@@ -422,20 +431,23 @@ const Navbar = ({ onMenuClick }) => {
                 {sidebarItems.map((section) => (
                   <div key={section.id}>
                     <div 
-                      className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors mb-2 ${
-                        activeSection.startsWith(section.id) 
+                      className={`flex items-center gap-3 p-2.5 lg:p-3 rounded-lg cursor-pointer transition-colors mb-2 ${
+                        activeSection.startsWith(section.id) || activeSection === section.id
                           ? 'bg-[#282828] text-white' 
                           : 'text-[#b3b3b3] hover:text-white hover:bg-[#1a1a1a]'
                       }`}
-                      onClick={() => setActiveSection(section.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveSection(section.id);
+                      }}
                     >
-                      <span className="text-lg">{section.icon}</span>
-                      <span className="font-medium">{section.label}</span>
+                      <span className="text-base lg:text-lg">{section.icon}</span>
+                      <span className="font-medium text-sm lg:text-base">{section.label}</span>
                     </div>
                     
                     {/* Subitems */}
                     {section.items && (
-                      <div className="ml-6 space-y-1">
+                      <div className="ml-4 lg:ml-6 space-y-1">
                         {section.items.map((item) => (
                           <div
                             key={item.id}
@@ -444,7 +456,10 @@ const Navbar = ({ onMenuClick }) => {
                                 ? 'bg-[#282828] text-white' 
                                 : 'text-[#b3b3b3] hover:text-white hover:bg-[#1a1a1a]'
                             }`}
-                            onClick={() => setActiveSection(item.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveSection(item.id);
+                            }}
                           >
                             <span className="text-sm">{item.icon}</span>
                             <span className="text-sm">{item.label}</span>
@@ -458,7 +473,7 @@ const Navbar = ({ onMenuClick }) => {
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 p-8 overflow-y-auto">
+            <div className="flex-1 p-4 lg:p-8 overflow-y-auto">
               {renderContent()}
             </div>
           </div>
