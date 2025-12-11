@@ -48,7 +48,8 @@ const MusicPlayer = () => {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 lg:left-[250px] right-0 bg-[#181818] border-t border-[#282828] px-2 lg:px-4 py-2 lg:py-3 z-50">
+    <div className="fixed bottom-0 lg:bottom-0 left-0 lg:left-[250px] right-0 bg-[#181818] border-t border-[#282828] px-2 lg:px-4 py-2 lg:py-3 z-50 
+                    mb-16 lg:mb-0">
       <div className="max-w-screen-2xl mx-auto flex items-center justify-between gap-2 lg:gap-4">
         
         {/* Left - Current Song Info */}
