@@ -37,12 +37,12 @@ const LikedSongs = () => {
 
   const handlePlayAll = () => {
     if (likedSongs.length > 0) {
-      playSong(likedSongs[0], likedSongs);
+      playSong(likedSongs[0], likedSongs, 0);
     }
   };
 
   const handlePlaySong = (song, index) => {
-    playSong(song, likedSongs);
+    playSong(song, likedSongs, index);
   };
 
   if (loading) {

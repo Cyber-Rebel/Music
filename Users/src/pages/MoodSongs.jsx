@@ -84,19 +84,19 @@ const MoodSongs = () => {
     setLimit(prevLimit => prevLimit + 10);
   };
 
-  const handlePlaySong = (song) => {
+  const handlePlaySong = (song, index) => {
     // If clicking the same song that's playing, toggle play/pause
     if (currentSong?._id === song._id) {
       togglePlayPause();
     } else {
-      // Play new song
-      playSong(song);
+      // Play new song with playlist context
+      playSong(song, songs, index);
     }
   };
 
   const handlePlayAll = () => {
     if (songs.length > 0) {
-      playSong(songs[0]);
+      playSong(songs[0], songs, 0);
     }
   };
 
@@ -104,7 +104,7 @@ const MoodSongs = () => {
     const shuffled = [...songs].sort(() => Math.random() - 0.5);
     setSongs(shuffled);
     if (shuffled.length > 0) {
-      playSong(shuffled[0]);
+      playSong(shuffled[0], shuffled, 0);
     }
   };
 
@@ -189,7 +189,7 @@ const MoodSongs = () => {
               return (
                 <div
                   key={song._id}
-                  onClick={() => handlePlaySong(song)}
+                  onClick={() => handlePlaySong(song, index)}
                   className={`group flex items-center gap-4 p-3 rounded-lg hover:bg-[#282828] transition-colors cursor-pointer ${
                     isCurrentSong ? 'bg-[#282828]' : ''
                   }`}
@@ -284,7 +284,7 @@ const MoodSongs = () => {
               onClick={handleLoadMore}
               disabled={loadingMore}
               className="bg-[#282828] text-white font-semibold px-8 py-3 rounded-full hover:bg-[#3e3e3e] transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
-            >
+            >                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
               {loadingMore ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

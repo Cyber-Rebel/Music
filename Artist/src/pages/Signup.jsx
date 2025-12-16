@@ -77,9 +77,7 @@ const Signup = () => {
     await dispatch(signupArtist(payload));
   };
 
-  const handleGoogleSignup = () => {
-    alert("Google signup coming soon!");
-  };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-(--color-bg-dark) p-4 relative overflow-hidden">
@@ -184,15 +182,7 @@ const Signup = () => {
             <div className="h-px bg-(--color-border-subtle) flex-1"></div>
           </div>
 
-          <Button
-            variant="google"
-            className="w-full flex items-center justify-center gap-3"
-            onClick={handleGoogleSignup}
-            disabled={loading}
-          >
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
-            Sign up with Google
-          </Button>
+
 
           <div className="mt-6 text-center text-sm text-(--color-text-secondary)">
             Already have an account?{' '}

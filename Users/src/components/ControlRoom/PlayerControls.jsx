@@ -25,7 +25,10 @@ const PlayerControls = ({
   onMuteToggle,
   onShuffleToggle,
   onRepeatToggle,
-  formatTime
+  formatTime,
+  hasSong = false,
+  hasPrevious = false,
+  hasNext = false
 }) => {
   return (
     <>
@@ -57,14 +60,25 @@ const PlayerControls = ({
         
         <button 
           onClick={onPrevious}
-          className="text-2xl text-white hover:text-[#1db954] transition-colors"
+          disabled={!hasSong}
+          className={`text-2xl transition-colors ${
+            hasSong 
+              ? 'text-white hover:text-[#1db954] cursor-pointer' 
+              : 'text-[#535353] cursor-not-allowed'
+          }`}
+          title={hasSong ? 'Previous' : 'No song playing'}
         >
           <FaStepBackward />
         </button>
         
         <button 
           onClick={onPlayPause}
-          className="w-14 h-14 bg-[#1db954] rounded-full flex items-center justify-center hover:scale-105 transition-transform"
+          disabled={!hasSong}
+          className={`w-14 h-14 rounded-full flex items-center justify-center transition-transform ${
+            hasSong 
+              ? 'bg-[#1db954] hover:scale-105' 
+              : 'bg-[#535353] cursor-not-allowed'
+          }`}
         >
           {isPlaying ? (
             <FaPause className="text-black text-xl" />
@@ -75,7 +89,13 @@ const PlayerControls = ({
         
         <button 
           onClick={onNext}
-          className="text-2xl text-white hover:text-[#1db954] transition-colors"
+          disabled={!hasSong}
+          className={`text-2xl transition-colors ${
+            hasSong 
+              ? 'text-white hover:text-[#1db954] cursor-pointer' 
+              : 'text-[#535353] cursor-not-allowed'
+          }`}
+          title={hasSong ? 'Next' : 'No song playing'}
         >
           <FaStepForward />
         </button>
@@ -83,11 +103,14 @@ const PlayerControls = ({
         <button 
           onClick={onRepeatToggle}
           className={`text-xl transition-colors relative ${repeatMode !== 'off' ? 'text-[#1db954]' : 'text-[#b3b3b3] hover:text-white'}`}
-          title={`Repeat: ${repeatMode}`}
+          title={`Repeat: ${repeatMode === 'off' ? 'Off' : repeatMode === 'all' ? 'All' : 'One'}`}
         >
           <FaRedo />
           {repeatMode === 'one' && (
             <span className="absolute -top-1 -right-1 text-[8px] bg-[#1db954] text-black w-3 h-3 rounded-full flex items-center justify-center font-bold">1</span>
+          )}
+          {repeatMode === 'all' && (
+            <span className="absolute -top-1 -right-1 text-[8px] bg-[#1db954] text-black w-3 h-3 rounded-full flex items-center justify-center font-bold">∞</span>
           )}
         </button>
       </div>

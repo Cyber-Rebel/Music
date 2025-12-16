@@ -116,7 +116,7 @@ const SongDetails = () => {
       
       // Create playlist with current song and recommendations if available
       const fullPlaylist = allSongs.length > 0 ? [songData, ...allSongs] : [songData];
-      playSong(songData, fullPlaylist);
+      playSong(songData, fullPlaylist, 0);
       socketInstance.emit('play', { musicId: songData._id });
     }
   }, [songData, id, allSongs, playSong, loading]);
@@ -126,9 +126,10 @@ const SongDetails = () => {
     if (isCurrentSong) {
       togglePlayPause();
     } else if (songData) {
-      playSong(songData);
+      const fullPlaylist = allSongs.length > 0 ? [songData, ...allSongs] : [songData];
+      playSong(songData, fullPlaylist, 0);
     }
-  }, [isCurrentSong, togglePlayPause, songData, playSong]);
+  }, [isCurrentSong, togglePlayPause, songData, allSongs, playSong]);
 
   const handleLike = useCallback(async () => {
     try {

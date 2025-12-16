@@ -16,10 +16,18 @@ export const MusicProvider = ({ children }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.7);
+  const [playlist, setPlaylistState] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(-1);
   const audioRef = useRef(null);
   const isPlayingRef = useRef(false); // Track playing state without causing re-renders
 
-  const playSong = useCallback((song) => {
+  // Set the playlist (queue of songs)
+  const setPlaylist = useCallback((songs, startIndex = 0) => {
+    setPlaylistState(songs);
+    setCurrentIndex(startIndex);
+  }, []);
+
+  const playSong = useCallback((song, songs = null, index = -1) => {
     if (!song) return;
     
     // If same song, just toggle play/pause
@@ -28,10 +36,28 @@ export const MusicProvider = ({ children }) => {
       return;
     }
     
+    // Pause current audio immediately to prevent echo/overlap
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    
+    // Update playlist if provided
+    if (songs && songs.length > 0) {
+      setPlaylistState(songs);
+      setCurrentIndex(index >= 0 ? index : songs.findIndex(s => s._id === song._id || s.musicUrl === song.musicUrl));
+    } else if (playlist.length > 0) {
+      // Find index in current playlist
+      const foundIndex = playlist.findIndex(s => s._id === song._id || s.musicUrl === song.musicUrl);
+      if (foundIndex >= 0) {
+        setCurrentIndex(foundIndex);
+      }
+    }
+    
     setCurrentSong(song);
     isPlayingRef.current = true;
     setIsPlaying(true);
-  }, [currentSong]);
+  }, [currentSong, playlist]);
 
   const pauseSong = useCallback(() => {
     isPlayingRef.current = false;
@@ -72,6 +98,54 @@ export const MusicProvider = ({ children }) => {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   }, []);
 
+  // Play next song in playlist
+  const playNext = useCallback(() => {
+    if (playlist.length === 0) return;
+    
+    // Pause current audio immediately to prevent echo
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    
+    const nextIndex = (currentIndex + 1) % playlist.length;
+    const nextSong = playlist[nextIndex];
+    
+    if (nextSong) {
+      setCurrentIndex(nextIndex);
+      setCurrentSong(nextSong);
+      isPlayingRef.current = true;
+      setIsPlaying(true);
+    }
+  }, [playlist, currentIndex]);
+
+  // Play previous song in playlist
+  const playPrevious = useCallback(() => {
+    if (playlist.length === 0) return;
+    
+    // If current time > 3 seconds, restart the song instead
+    if (audioRef.current && audioRef.current.currentTime > 3) {
+      audioRef.current.currentTime = 0;
+      return;
+    }
+    
+    // Pause current audio immediately to prevent echo
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    
+    const prevIndex = currentIndex === 0 ? playlist.length - 1 : currentIndex - 1;
+    const prevSong = playlist[prevIndex];
+    
+    if (prevSong) {
+      setCurrentIndex(prevIndex);
+      setCurrentSong(prevSong);
+      isPlayingRef.current = true;
+      setIsPlaying(true);
+    }
+  }, [playlist, currentIndex]);
+
   // Handle song change - load and play new song
   useEffect(() => {
     if (!audioRef.current || !currentSong) return;
@@ -99,6 +173,8 @@ export const MusicProvider = ({ children }) => {
     duration,
     volume,
     audioRef,
+    playlist,
+    currentIndex,
     playSong,
     pauseSong,
     togglePlayPause,
@@ -107,6 +183,9 @@ export const MusicProvider = ({ children }) => {
     setCurrentTime,
     setDuration,
     setIsPlaying,
+    setPlaylist,
+    playNext,
+    playPrevious,
     formatTime
   };
 

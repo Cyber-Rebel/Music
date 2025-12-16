@@ -36,9 +36,10 @@ const Search = () => {
     }
   };
 
-  const handlePlaySong = (song, e) => {
+  const handlePlaySong = (song, e, index = -1) => {
     e?.stopPropagation();
-    playSong(song, searchResults);
+    const songIndex = index >= 0 ? index : searchResults.findIndex(s => s._id === song._id);
+    playSong(song, searchResults, songIndex);
   };
 
   const handleSongClick = (songId) => {

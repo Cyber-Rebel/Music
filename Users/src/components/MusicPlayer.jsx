@@ -13,7 +13,9 @@ const MusicPlayer = () => {
     togglePlayPause,
     seekTo,
     setVolumeLevel,
-    formatTime
+    formatTime,
+    playNext,
+    playPrevious
   } = useMusicPlayer();
 
   const sliderVars = useMemo(() => {
@@ -25,11 +27,6 @@ const MusicPlayer = () => {
       volume: { '--range-progress': `${volumePercent}%` }
     };
   }, [currentTime, duration, volume]);
-
-  const nextplay = useCallback(() => {
-    // Logic to play the next song
-    alert("next song")
-  }, []);
 
   const handleSeek = useCallback((event) => {
     const newProgress = Number(event.target.value);
@@ -81,7 +78,7 @@ const MusicPlayer = () => {
             <button className="text-[#b3b3b3] hover:text-white transition-colors hidden lg:block">
               <FaRandom className="text-sm" />
             </button>
-            <button className="text-[#b3b3b3] hover:text-white transition-colors">
+            <button onClick={playPrevious} className="text-[#b3b3b3] hover:text-white transition-colors">
               <FaStepBackward className="text-base lg:text-lg" />
             </button>
             <button
@@ -94,7 +91,7 @@ const MusicPlayer = () => {
                 <FaPlay className="text-base lg:text-lg ml-0.5" />
               )}
             </button>
-            <button onClick={nextplay} className="text-[#b3b3b3] hover:text-white transition-colors">
+            <button onClick={playNext} className="text-[#b3b3b3] hover:text-white transition-colors">
               <FaStepForward className="text-base lg:text-lg" />
             </button>
             <button className="text-[#b3b3b3] hover:text-white transition-colors hidden lg:block">

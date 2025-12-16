@@ -45,12 +45,7 @@ const Login = () => {
     }));
   };
 
-  // ---------------------------
-  // Google Login (dummy)
-  // ---------------------------
-  const handleGoogleLogin = () => {
-    alert('Google login feature coming soon!');
-  };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-(--color-bg-dark) p-4 relative overflow-hidden">
@@ -133,21 +128,6 @@ const Login = () => {
             <span className="text-sm text-(--color-text-secondary)">OR</span>
             <div className="h-px bg-(--color-border-subtle) flex-1"></div>
           </div>
-
-          {/* Google Button */}
-          <Button
-            variant="google"
-            className="w-full flex items-center justify-center gap-3"
-            onClick={handleGoogleLogin}
-            disabled={loading}
-          >
-            <img
-              src="https://www.svgrepo.com/show/475656/google-color.svg"
-              alt="Google"
-              className="w-5 h-5"
-            />
-            Continue with Google
-          </Button>
 
           {/* Signup Link */}
           <div className="mt-6 text-center text-sm text-(--color-text-secondary)">

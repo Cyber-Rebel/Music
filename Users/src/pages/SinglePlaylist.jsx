@@ -35,7 +35,7 @@ const SinglePlaylist = () => {
 
   const handlePlaySong = (index) => {
     if (playlist?.songs && playlist.songs.length > 0) {
-      playSong(playlist.songs[index], playlist.songs);
+      playSong(playlist.songs[index], playlist.songs, index);
     }
   };
 

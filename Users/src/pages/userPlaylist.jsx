@@ -47,14 +47,14 @@ const UserPlaylist = () => {
   const handlePlaySong = (index) => {
     if (songs.length > 0) {
       setPlayingIndex(index);
-      playSong(songs[index], songs);
+      playSong(songs[index], songs, index);
     }
   };
 
   const handlePlayAll = () => {
     if (songs.length > 0) {
       setPlayingIndex(0);
-      playSong(songs[0], songs);
+      playSong(songs[0], songs, 0);
     }
   };
 
@@ -63,7 +63,7 @@ const UserPlaylist = () => {
       const randomIndex = Math.floor(Math.random() * songs.length);
       setPlayingIndex(randomIndex);
       const shuffledSongs = [...songs].sort(() => Math.random() - 0.5);
-      playSong(shuffledSongs[0], shuffledSongs);
+      playSong(shuffledSongs[0], shuffledSongs, 0);
     }
   };
 

@@ -18,7 +18,9 @@ const NowPlaying = ({
   onMuteToggle,
   onShuffleToggle,
   onRepeatToggle,
-  formatTime
+  formatTime,
+  hasPrevious = false,
+  hasNext = false
 }) => {
   return (
     <div className="bg-[#181818] rounded-xl p-6 border border-[#282828]">
@@ -63,6 +65,9 @@ const NowPlaying = ({
             onShuffleToggle={onShuffleToggle}
             onRepeatToggle={onRepeatToggle}
             formatTime={formatTime}
+            hasSong={!!currentSong}
+            hasPrevious={hasPrevious}
+            hasNext={hasNext}
           />
         </div>
       </div>

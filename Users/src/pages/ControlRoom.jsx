@@ -1,4 +1,4 @@
- import { useState, useEffect, useRef } from 'react';
+ import { useState, useEffect, useRef, useCallback } from 'react';
 import { data, useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchMusicData } from '../Store/actions/musicaction';
@@ -59,6 +59,36 @@ const ControlRoom = () => {
     dispatch(fetchMusicData());
   }, [code, dispatch]);
 
+  // Music Player Functions - defined early so they can be used in audio event handlers
+  const handlePlaySong = useCallback((song, index) => {
+    setCurrentSong(song);
+    setCurrentIndex(index);
+    setIsPlaying(true);
+  }, []);
+
+  const playNext = useCallback(() => {
+    if (allMusic && allMusic.length > 0) {
+      let nextIndex;
+      if (isShuffled) {
+        nextIndex = Math.floor(Math.random() * allMusic.length);
+      } else {
+        nextIndex = (currentIndex + 1) % allMusic.length;
+      }
+      setCurrentSong(allMusic[nextIndex]);
+      setCurrentIndex(nextIndex);
+      setIsPlaying(true);
+    }
+  }, [allMusic, currentIndex, isShuffled]);
+
+  const playPrevious = useCallback(() => {
+    if (allMusic && allMusic.length > 0) {
+      const prevIndex = currentIndex === 0 ? allMusic.length - 1 : currentIndex - 1;
+      setCurrentSong(allMusic[prevIndex]);
+      setCurrentIndex(prevIndex);
+      setIsPlaying(true);
+    }
+  }, [allMusic, currentIndex]);
+
   // Audio event handlers
   useEffect(() => {
     const audio = audioRef.current;
@@ -71,10 +101,21 @@ const ControlRoom = () => {
     };
     const handleEnded = () => {
       if (repeatMode === 'one') {
+        // Repeat current song
         audio.currentTime = 0;
         audio.play();
-      } else {
+      } else if (repeatMode === 'all') {
+        // Play next song, loop back to first if at end
         playNext();
+      } else {
+        // repeatMode === 'off'
+        // Only play next if not at the end of the list
+        if (allMusic && currentIndex < allMusic.length - 1) {
+          playNext();
+        } else {
+          // Stop playing at the end
+          setIsPlaying(false);
+        }
       }
     };
 
@@ -87,7 +128,7 @@ const ControlRoom = () => {
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [repeatMode, currentIndex, allMusic]);
+  }, [repeatMode, currentIndex, allMusic, playNext]);
 
   // Play/Pause control
   useEffect(() => {
@@ -303,19 +344,13 @@ const ControlRoom = () => {
     };
   }, []);
 
-
-  // Music Player Functions
-  const handlePlaySong = (song, index) => {
-    setCurrentSong(song);
-    setCurrentIndex(index);
-    setIsPlaying(true);
-    
-    // Update queue
-    if (allMusic && allMusic.length > 0) {
-      const remainingSongs = allMusic.slice(index + 1);
+  // Update queue when song changes
+  useEffect(() => {
+    if (allMusic && allMusic.length > 0 && currentIndex >= 0) {
+      const remainingSongs = allMusic.slice(currentIndex + 1);
       setQueue(remainingSongs.slice(0, 5));
     }
-  };
+  }, [currentIndex, allMusic]);
 
   const togglePlayPause = () => {
     setIsPlaying(!isPlaying);
@@ -326,25 +361,6 @@ const ControlRoom = () => {
     if (audio) {
       audio.currentTime = time;
       setCurrentTime(time);
-    }
-  };
-
-  const playNext = () => {
-    if (allMusic && allMusic.length > 0) {
-      let nextIndex;
-      if (isShuffled) {
-        nextIndex = Math.floor(Math.random() * allMusic.length);
-      } else {
-        nextIndex = (currentIndex + 1) % allMusic.length;
-      }
-      handlePlaySong(allMusic[nextIndex], nextIndex);
-    }
-  };
-
-  const playPrevious = () => {
-    if (allMusic && allMusic.length > 0) {
-      const prevIndex = currentIndex === 0 ? allMusic.length - 1 : currentIndex - 1;
-      handlePlaySong(allMusic[prevIndex], prevIndex);
     }
   };
 
@@ -458,6 +474,8 @@ const ControlRoom = () => {
             onShuffleToggle={toggleShuffle}
             onRepeatToggle={toggleRepeat}
             formatTime={formatTime}
+            hasPrevious={allMusic && allMusic.length > 0}
+            hasNext={allMusic && allMusic.length > 0}
           />
 
           {/* Queue Section */}
