@@ -75,6 +75,7 @@ const Navbar = ({ onMenuClick }) => {
     searchTimeoutRef.current = setTimeout(() => {
       searchMusic(query);
     }, 300);
+    
   };
 
   // Handle clicking on a search result
